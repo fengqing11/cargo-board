@@ -8,6 +8,7 @@ type RawRecord = {
 
 type CargoItem = {
   id: string
+  imageLink: string
   spu: string
   skcId: string
   store: string
@@ -62,6 +63,10 @@ function numberValue(value: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
+function cleanImageLink(value: unknown): string {
+  return firstText(value).replace(/^"|"$/g, '')
+}
+
 function leafCategory(category: string) {
   return category.split('>').at(-1)?.trim() || category || '-'
 }
@@ -74,6 +79,7 @@ function normalizeRecord(record: RawRecord): CargoItem {
   )
   const item = {
     id: record.id,
+    imageLink: cleanImageLink(fields['图片链接'] || fields['图片']),
     spu: firstText(fields.SPU),
     skcId: firstText(fields.skc_id),
     store: firstText(fields['店铺']),
@@ -99,9 +105,10 @@ function normalizeRecord(record: RawRecord): CargoItem {
 }
 
 function exportCsv(items: CargoItem[]) {
-  const headers = ['店铺', 'SPU', 'SKC ID', '款号', '颜色', '类目', '运营', '上架天数', '近7天销量', '近30天销量', ...MARKET_KEYS]
+  const headers = ['店铺', '图片链接', 'SPU', 'SKC ID', '款号', '颜色', '类目', '运营', '上架天数', '近7天销量', '近30天销量', ...MARKET_KEYS]
   const rows = items.map((item) => [
     item.store,
+    item.imageLink,
     item.spu,
     item.skcId,
     item.styleNo,
@@ -134,6 +141,13 @@ type CargoRowProps = {
 const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid }: CargoRowProps) {
   return (
     <tr>
+      <td className="image-cell">
+        {item.imageLink ? (
+          <a href={item.imageLink} target="_blank" rel="noreferrer" title="点击查看原图">
+            <img src={item.imageLink} alt={item.styleNo || item.spu || '商品图片'} loading="lazy" />
+          </a>
+        ) : <span className="no-image">无图</span>}
+      </td>
       <td><strong>{item.spu || '-'}</strong><small>{item.skcId || '-'}</small></td>
       <td>{item.styleNo || '-'}</td>
       <td>{item.color || '-'}</td>
@@ -314,6 +328,7 @@ function App() {
           <table>
             <thead>
               <tr>
+                <th>图片</th>
                 <th>SPU / SKC</th>
                 <th>款号</th>
                 <th>颜色</th>
@@ -326,12 +341,12 @@ function App() {
             </thead>
             <tbody>
               {loading && !items.length ? (
-                <tr><td colSpan={8} className="empty">正在加载货盘数据…</td></tr>
+                <tr><td colSpan={9} className="empty">正在加载货盘数据…</td></tr>
               ) : sortedItems.length ? sortedItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
                 return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} />
               }) : (
-                <tr><td colSpan={8} className="empty">没有匹配的数据</td></tr>
+                <tr><td colSpan={9} className="empty">没有匹配的数据</td></tr>
               )}
             </tbody>
           </table>
