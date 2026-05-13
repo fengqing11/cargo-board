@@ -1,1 +1,2 @@
+name = "cargo-board"
 pages_build_output_dir = "./dist"
