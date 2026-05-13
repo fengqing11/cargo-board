@@ -141,21 +141,21 @@ type CargoRowProps = {
 const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid }: CargoRowProps) {
   return (
     <tr>
-      <td className="image-cell">
+      <td className="image-cell" data-label="图片">
         {item.imageLink ? (
           <a href={item.imageLink} target="_blank" rel="noreferrer" title="点击查看原图">
             <img src={item.imageLink} alt={item.styleNo || item.spu || '商品图片'} loading="lazy" />
           </a>
         ) : <span className="no-image">无图</span>}
       </td>
-      <td><strong>{item.spu || '-'}</strong><small>{item.skcId || '-'}</small></td>
-      <td>{item.styleNo || '-'}</td>
-      <td>{item.color || '-'}</td>
-      <td className="category" title={item.category}>{item.leafCategory || '-'}</td>
-      <td>{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
-      <td className={item.sales7 > 0 ? 'sales hot' : 'sales'}>{item.sales7}</td>
-      <td className={item.sales30 > 0 ? 'sales hot' : 'sales'}>{item.sales30}</td>
-      <td className="pid-list">
+      <td data-label="SPU / SKC"><strong>{item.spu || '-'}</strong><small>{item.skcId || '-'}</small></td>
+      <td data-label="款号">{item.styleNo || '-'}</td>
+      <td data-label="颜色">{item.color || '-'}</td>
+      <td className="category" data-label="类目" title={item.category}>{item.leafCategory || '-'}</td>
+      <td data-label="上架">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
+      <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label="7天销量">{item.sales7}</td>
+      <td className={item.sales30 > 0 ? 'sales hot' : 'sales'} data-label="30天销量">{item.sales30}</td>
+      <td className="pid-list" data-label="各站 PID">
         {MARKET_KEYS.map((key) => {
           const pid = item.pids[key]
           const canCopy = Boolean(pid && pid !== '-')
