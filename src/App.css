@@ -157,7 +157,7 @@ button.pid-chip em {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin: 18px 0;
 }
@@ -192,6 +192,11 @@ button.pid-chip em {
   color: #0f172a;
   font-size: 34px;
   line-height: 1;
+}
+
+.stats-grid .updated-at {
+  font-size: 26px;
+  letter-spacing: -0.03em;
 }
 
 .agency-guide {

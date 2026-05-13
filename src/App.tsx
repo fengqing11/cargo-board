@@ -313,6 +313,7 @@ function App() {
   const [items, setItems] = useState<CargoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [updatedAt, setUpdatedAt] = useState('')
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('全部')
   const [tagFilter, setTagFilter] = useState('全部')
@@ -336,6 +337,13 @@ function App() {
       const payload = await response.json()
       const list = (payload?.data?.result || []) as RawRecord[]
       setItems(list.map(normalizeRecord))
+      setUpdatedAt(new Intl.DateTimeFormat('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(new Date()))
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败')
     } finally {
@@ -480,11 +488,11 @@ function App() {
         <div>
           <p className="eyebrow">Cargo Board</p>
           <h1>{STORE_NAME} 货盘表</h1>
-          <p className="sub-title">实时读取金山 AirScript 接口，支持搜索、类目筛选、销量排序和 CSV 导出。</p>
+          <p className="sub-title">实时读取金山 AirScript 接口，支持搜索、类目筛选、标签选品、销量排序，并可导出当前筛选结果。</p>
         </div>
         <div className="actions">
           <button type="button" onClick={loadData} disabled={loading}>{loading ? '刷新中…' : '刷新数据'}</button>
-          <button type="button" className="secondary" onClick={() => exportCsv(sortedItems)} disabled={!sortedItems.length}>导出 CSV</button>
+          <button type="button" className="secondary" onClick={() => exportCsv(sortedItems)} disabled={!sortedItems.length} title="导出当前搜索、筛选和排序后的结果">导出当前结果</button>
         </div>
       </header>
 
@@ -494,6 +502,7 @@ function App() {
         <div><span>SPU 数</span><strong>{stats.spuCount}</strong></div>
         <div><span>SKC 数量</span><strong>{stats.skcCount}</strong></div>
         <div><span>有效 PID</span><strong>{stats.pidCount}</strong></div>
+        <div><span>数据更新时间</span><strong className="updated-at">{updatedAt || '加载中'}</strong></div>
       </section>
 
       <section className="agency-guide">
@@ -588,7 +597,7 @@ function App() {
 
       <section className="table-card">
         <div className="table-meta">
-          <span>共 {items.length} 条数据，筛选后 {sortedItems.length} 条，当前展示 {sortedItems.length ? pageStart + 1 : 0}-{pageEnd} 条</span>
+          <span>共 {items.length} 条数据，筛选后 {sortedItems.length} 条，当前展示 {sortedItems.length ? pageStart + 1 : 0}-{pageEnd} 条；导出会包含当前筛选结果</span>
           <div className="pagination">
             <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage - 1)} disabled={safeCurrentPage <= 1}>上一页</button>
             <strong>{safeCurrentPage} / {totalPages}</strong>
