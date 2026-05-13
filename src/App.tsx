@@ -144,6 +144,7 @@ type CargoRowProps = {
   item: CargoItem
   copiedPid: string
   onCopyPid: (pid: string) => void
+  onPreviewImage: (item: CargoItem) => void
   onSearchSpu: (spu: string) => void
 }
 
@@ -176,14 +177,14 @@ const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
   )
 })
 
-const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid, onSearchSpu }: CargoRowProps) {
+const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid, onPreviewImage, onSearchSpu }: CargoRowProps) {
   return (
     <tr>
       <td className="image-cell" data-label="图片">
         {item.imageLink ? (
-          <a href={item.imageLink} target="_blank" rel="noreferrer" title="点击查看原图">
+          <button className="image-preview-trigger" type="button" onClick={() => onPreviewImage(item)} title="预览大图">
             <ImageThumb key={item.imageLink} src={item.imageLink} alt={item.styleNo || item.spu || '商品图片'} />
-          </a>
+          </button>
         ) : <span className="no-image">无图</span>}
       </td>
       <td data-label="SPU / SKC">
@@ -233,6 +234,7 @@ function App() {
   const [sortBy, setSortBy] = useState<SortKey>('sales7')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
+  const [previewItem, setPreviewItem] = useState<CargoItem | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [isPending, startTransition] = useTransition()
 
@@ -340,6 +342,10 @@ function App() {
   function handleSearchSpu(spu: string) {
     setKeyword((current) => (current.trim() === spu ? '' : spu))
     setCurrentPage(1)
+  }
+
+  function closeImagePreview() {
+    setPreviewItem(null)
   }
 
   function renderSortableHeader(value: SortKey) {
@@ -471,7 +477,7 @@ function App() {
                 <tr><td colSpan={9} className="empty">正在加载货盘数据…</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
-                return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} onSearchSpu={handleSearchSpu} />
+                return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
               }) : (
                 <tr><td colSpan={9} className="empty">没有匹配的数据</td></tr>
               )}
@@ -479,6 +485,26 @@ function App() {
           </table>
         </div>
       </section>
+
+      {previewItem && (
+        <div className="image-modal" role="dialog" aria-modal="true" aria-label="商品图片预览" onClick={closeImagePreview}>
+          <div className="image-modal-card" onClick={(event) => event.stopPropagation()}>
+            <div className="image-modal-header">
+              <div>
+                <strong>{previewItem.styleNo || previewItem.spu || '商品图片'}</strong>
+                <span>{previewItem.spu || '-'} / {previewItem.skcId || '-'}</span>
+              </div>
+              <button type="button" className="image-modal-close" onClick={closeImagePreview} aria-label="关闭预览">×</button>
+            </div>
+            <div className="image-modal-body">
+              <img src={previewItem.imageLink} alt={previewItem.styleNo || previewItem.spu || '商品图片'} />
+            </div>
+            <div className="image-modal-footer">
+              <a href={previewItem.imageLink} target="_blank" rel="noreferrer">打开原图</a>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
