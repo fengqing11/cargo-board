@@ -63,6 +63,14 @@ const SORT_LABELS: Record<SortKey, string> = {
   sales7: '7天销量',
   daysOnline: '上架天数',
 }
+const TAG_TONES: Record<string, PickTag['tone']> = {
+  爆款: 'hot',
+  潜力新品: 'new',
+  稳定出单: 'stable',
+  多站点: 'coverage',
+  待观察: 'watch',
+}
+const TAG_ORDER = ['爆款', '稳定出单', '潜力新品', '多站点', '待观察']
 const PAGE_SIZE = 50
 const MIN_GOOD_PID_COUNT = 3
 
@@ -279,6 +287,7 @@ function App() {
   const [error, setError] = useState('')
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('全部')
+  const [tagFilter, setTagFilter] = useState('全部')
   const [sortBy, setSortBy] = useState<SortKey>('sales7')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
@@ -317,13 +326,25 @@ function App() {
     return ['全部', ...Array.from(set).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))]
   }, [items])
 
+  const tagOptions = useMemo(() => {
+    const set = new Set<string>()
+    items.forEach((item) => {
+      item.pickTags.forEach((tag) => set.add(tag.label))
+    })
+    const extraTags = Array.from(set)
+      .filter((tag) => !TAG_ORDER.includes(tag))
+      .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+    return ['全部', ...TAG_ORDER, ...extraTags]
+  }, [items])
+
   const filteredItems = useMemo(() => {
     const key = keyword.trim().toLowerCase()
     return items.filter((item) => {
       const inCategory = category === '全部' || item.leafCategory === category
-      return inCategory && (!key || item.searchable.includes(key))
+      const inTag = tagFilter === '全部' || item.pickTags.some((tag) => tag.label === tagFilter)
+      return inCategory && inTag && (!key || item.searchable.includes(key))
     })
-  }, [items, keyword, category])
+  }, [items, keyword, category, tagFilter])
 
   const sortedItems = useMemo(() => {
     const direction = sortDirection === 'desc' ? -1 : 1
@@ -493,6 +514,24 @@ function App() {
             )}
           </div>
         </label>
+        <div className="tag-filter-field">
+          <span>推荐标签</span>
+          <div className="tag-filter-list">
+            {tagOptions.map((name) => (
+              <button
+                type="button"
+                className={`tag-filter-chip ${TAG_TONES[name] || 'all'}${tagFilter === name ? ' active' : ''}`}
+                key={name}
+                onClick={() => {
+                  setTagFilter((current) => (current === name && name !== '全部' ? '全部' : name))
+                  setCurrentPage(1)
+                }}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
         {isPending && <div className="sort-pending">排序处理中…</div>}
       </section>
 

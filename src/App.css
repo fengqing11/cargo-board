@@ -196,7 +196,7 @@ button.pid-chip em {
 
 .toolbar {
   display: grid;
-  grid-template-columns: 2fr 1fr auto;
+  grid-template-columns: 2fr 1fr 2fr auto;
   gap: 16px;
   align-items: end;
   padding: 18px;
@@ -212,12 +212,76 @@ button.pid-chip em {
   white-space: nowrap;
 }
 
-label span {
+label span,
+.tag-filter-field > span {
   display: block;
   margin-bottom: 8px;
   color: #64748b;
   font-size: 13px;
   font-weight: 700;
+}
+
+.tag-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 46px;
+  align-items: center;
+}
+
+.tag-filter-chip {
+  min-height: 30px;
+  padding: 6px 11px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.78;
+  transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.tag-filter-chip.all {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.tag-filter-chip.hot {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.tag-filter-chip.new {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.tag-filter-chip.stable {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.tag-filter-chip.coverage {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+
+.tag-filter-chip.watch {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.tag-filter-chip:hover:not(:disabled),
+.tag-filter-chip.active {
+  box-shadow: inset 0 0 0 1px currentColor;
+  opacity: 1;
+  transform: none;
+}
+
+.tag-filter-chip.active::after {
+  margin-left: 5px;
+  content: '×';
+  font-weight: 900;
 }
 
 input,
