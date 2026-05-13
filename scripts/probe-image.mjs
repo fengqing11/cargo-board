@@ -1,0 +1,12 @@
+const res = await fetch('http://117.72.67.127:30080/wps/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task', {
+  method: 'POST',
+  headers: {
+    'AirScript-Token': '6fGqU99bv52z1X4GgGwyoV',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ Context: { argv: { store_name: 'TTS-烛照' } } }),
+});
+const data = await res.json();
+for (const row of data.data.result.slice(0, 5)) {
+  console.log(JSON.stringify({ id: row.id, img: row.fields['图片'], link: row.fields['图片链接'] }, null, 2));
+}
