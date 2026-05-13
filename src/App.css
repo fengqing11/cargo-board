@@ -244,10 +244,34 @@ select:focus {
 }
 
 .table-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   padding: 16px 20px;
   color: #64748b;
   font-size: 14px;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.pagination button {
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.pagination strong {
+  color: #334155;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .table-wrap {
@@ -444,6 +468,11 @@ td small {
   .stats-grid,
   .toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .table-meta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   h1 {

@@ -57,6 +57,7 @@ const SORT_LABELS: Record<SortKey, string> = {
   sales7: '7天销量',
   daysOnline: '上架天数',
 }
+const PAGE_SIZE = 50
 
 function firstText(value: unknown): string {
   if (Array.isArray(value)) return firstText(value[0])
@@ -194,6 +195,7 @@ function App() {
   const [sortBy, setSortBy] = useState<SortKey>('sales7')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
   const [isPending, startTransition] = useTransition()
 
   const loadData = useCallback(async () => {
@@ -240,6 +242,14 @@ function App() {
     return [...filteredItems].sort((a, b) => (a[sortBy] - b[sortBy]) * direction)
   }, [filteredItems, sortBy, sortDirection])
 
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / PAGE_SIZE))
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+  const pageStart = (safeCurrentPage - 1) * PAGE_SIZE
+  const pageEnd = Math.min(pageStart + PAGE_SIZE, sortedItems.length)
+  const pageItems = useMemo(() => {
+    return sortedItems.slice(pageStart, pageEnd)
+  }, [sortedItems, pageStart, pageEnd])
+
   const stats = useMemo(() => {
     const spuSet = new Set<string>()
     const skcSet = new Set<string>()
@@ -281,7 +291,12 @@ function App() {
         setSortBy(value)
         setSortDirection('desc')
       }
+      setCurrentPage(1)
     })
+  }
+
+  function handlePageChange(page: number) {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages))
   }
 
   function renderSortableHeader(value: SortKey) {
@@ -328,11 +343,24 @@ function App() {
       <section className="toolbar">
         <label>
           <span>搜索</span>
-          <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="SPU / SKC / 款号 / 颜色" />
+          <input
+            value={keyword}
+            onChange={(e) => {
+              setKeyword(e.target.value)
+              setCurrentPage(1)
+            }}
+            placeholder="SPU / SKC / 款号 / 颜色"
+          />
         </label>
         <label>
           <span>类目</span>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value)
+              setCurrentPage(1)
+            }}
+          >
             {categories.map((name) => <option key={name} value={name}>{name}</option>)}
           </select>
         </label>
@@ -340,7 +368,14 @@ function App() {
       </section>
 
       <section className="table-card">
-        <div className="table-meta">共 {items.length} 条数据，当前展示 {sortedItems.length} 条</div>
+        <div className="table-meta">
+          <span>共 {items.length} 条数据，筛选后 {sortedItems.length} 条，当前展示 {sortedItems.length ? pageStart + 1 : 0}-{pageEnd} 条</span>
+          <div className="pagination">
+            <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage - 1)} disabled={safeCurrentPage <= 1}>上一页</button>
+            <strong>{safeCurrentPage} / {totalPages}</strong>
+            <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage + 1)} disabled={safeCurrentPage >= totalPages}>下一页</button>
+          </div>
+        </div>
         <div className="table-wrap">
           <table>
             <thead>
@@ -359,7 +394,7 @@ function App() {
             <tbody>
               {loading && !items.length ? (
                 <tr><td colSpan={9} className="empty">正在加载货盘数据…</td></tr>
-              ) : sortedItems.length ? sortedItems.map((item) => {
+              ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
                 return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} />
               }) : (
