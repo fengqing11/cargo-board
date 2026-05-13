@@ -27,6 +27,7 @@ type CargoItem = {
 }
 
 type SortKey = 'sales30' | 'sales7' | 'daysOnline'
+type SortDirection = 'asc' | 'desc'
 
 const STORE_NAME = 'TTS-烛照'
 const MARKET_KEYS = [
@@ -49,6 +50,12 @@ const MARKET_LABELS: Record<string, string> = {
   'PID-IT（意大利）': 'IT 意大利',
   'PID-MX（墨西哥）': 'MX 墨西哥',
   'PID-SA（沙特）': 'SA 沙特',
+}
+
+const SORT_LABELS: Record<SortKey, string> = {
+  sales30: '30天销量',
+  sales7: '7天销量',
+  daysOnline: '上架天数',
 }
 
 function firstText(value: unknown): string {
@@ -97,7 +104,7 @@ function normalizeRecord(record: RawRecord): CargoItem {
 
   return {
     ...item,
-    searchable: [item.spu, item.skcId, item.styleNo, item.color, item.operator, item.category, item.account]
+    searchable: [item.spu, item.skcId, item.styleNo, item.color, item.category, item.account]
       .join(' ')
       .toLowerCase(),
     pidCount: MARKET_KEYS.reduce((sum, key) => sum + (pids[key] && pids[key] !== '-' ? 1 : 0), 0),
@@ -152,7 +159,7 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid }: CargoRow
       <td data-label="款号">{item.styleNo || '-'}</td>
       <td data-label="颜色">{item.color || '-'}</td>
       <td className="category" data-label="类目" title={item.category}>{item.leafCategory || '-'}</td>
-      <td data-label="上架">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
+      <td data-label="上架天数">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
       <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label="7天销量">{item.sales7}</td>
       <td className={item.sales30 > 0 ? 'sales hot' : 'sales'} data-label="30天销量">{item.sales30}</td>
       <td className="pid-list" data-label="各站 PID">
@@ -184,7 +191,8 @@ function App() {
   const [error, setError] = useState('')
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('全部')
-  const [sortBy, setSortBy] = useState<SortKey>('sales30')
+  const [sortBy, setSortBy] = useState<SortKey>('sales7')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
   const [isPending, startTransition] = useTransition()
 
@@ -228,8 +236,9 @@ function App() {
   }, [items, keyword, category])
 
   const sortedItems = useMemo(() => {
-    return [...filteredItems].sort((a, b) => b[sortBy] - a[sortBy])
-  }, [filteredItems, sortBy])
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...filteredItems].sort((a, b) => (a[sortBy] - b[sortBy]) * direction)
+  }, [filteredItems, sortBy, sortDirection])
 
   const stats = useMemo(() => {
     const spuSet = new Set<string>()
@@ -273,8 +282,32 @@ function App() {
 
   function handleSortChange(value: SortKey) {
     startTransition(() => {
-      setSortBy(value)
+      if (sortBy === value) {
+        setSortDirection((current) => (current === 'desc' ? 'asc' : 'desc'))
+      } else {
+        setSortBy(value)
+        setSortDirection('desc')
+      }
     })
+  }
+
+  function renderSortableHeader(value: SortKey) {
+    const active = sortBy === value
+    const nextDirection = active && sortDirection === 'desc' ? 'asc' : 'desc'
+    const directionLabel = sortDirection === 'desc' ? '倒序' : '正序'
+    return (
+      <button
+        type="button"
+        className={`sort-header${active ? ' active' : ''}`}
+        onClick={() => handleSortChange(value)}
+        aria-sort={active ? (sortDirection === 'desc' ? 'descending' : 'ascending') : 'none'}
+        title={`按${SORT_LABELS[value]}${nextDirection === 'desc' ? '倒序' : '正序'}排序`}
+      >
+        {SORT_LABELS[value]}
+        <span aria-hidden="true">{active ? (sortDirection === 'desc' ? '↓' : '↑') : '↕'}</span>
+        {active && <em>{directionLabel}</em>}
+      </button>
+    )
   }
 
   return (
@@ -304,7 +337,7 @@ function App() {
       <section className="toolbar">
         <label>
           <span>搜索</span>
-          <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="SPU / SKC / 款号 / 颜色 / 运营" />
+          <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="SPU / SKC / 款号 / 颜色" />
         </label>
         <label>
           <span>类目</span>
@@ -312,14 +345,7 @@ function App() {
             {categories.map((name) => <option key={name} value={name}>{name}</option>)}
           </select>
         </label>
-        <label>
-          <span>排序 {isPending ? '处理中…' : ''}</span>
-          <select value={sortBy} onChange={(e) => handleSortChange(e.target.value as SortKey)}>
-            <option value="sales30">近 30 天销量</option>
-            <option value="sales7">近 7 天销量</option>
-            <option value="daysOnline">上架天数</option>
-          </select>
-        </label>
+        {isPending && <div className="sort-pending">排序处理中…</div>}
       </section>
 
       <section className="table-card">
@@ -333,9 +359,9 @@ function App() {
                 <th>款号</th>
                 <th>颜色</th>
                 <th>类目</th>
-                <th>上架</th>
-                <th>7天销量</th>
-                <th>30天销量</th>
+                <th>{renderSortableHeader('daysOnline')}</th>
+                <th>{renderSortableHeader('sales7')}</th>
+                <th>{renderSortableHeader('sales30')}</th>
                 <th>各站 PID</th>
               </tr>
             </thead>

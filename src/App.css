@@ -196,11 +196,20 @@ button.pid-chip em {
 
 .toolbar {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr auto;
   gap: 16px;
+  align-items: end;
   padding: 18px;
   border-radius: 22px;
   margin-bottom: 18px;
+}
+
+.sort-pending {
+  padding: 0 6px 12px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 label span {
@@ -271,6 +280,45 @@ th {
   background: #f8fafc;
   font-size: 13px;
   white-space: nowrap;
+}
+
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  font-size: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sort-header:hover:not(:disabled) {
+  color: #2563eb;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.sort-header.active {
+  color: #1d4ed8;
+}
+
+.sort-header span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.sort-header em {
+  color: #64748b;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
 }
 
 td {
