@@ -80,6 +80,17 @@ const TAG_DESCRIPTIONS: Record<string, string> = {
   待观察: '暂未出现明显销量、上新或多站点覆盖信号',
 }
 const TAG_ORDER = ['爆款', '稳定出单', '潜力新品', '多站点', '待观察']
+const BASKET_STORAGE_KEY = 'cargo-board:selected-items'
+
+function readSavedSelectedIds() {
+  try {
+    const raw = window.localStorage.getItem(BASKET_STORAGE_KEY)
+    const ids = raw ? JSON.parse(raw) : []
+    return new Set(Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [])
+  } catch {
+    return new Set<string>()
+  }
+}
 
 function firstText(value: unknown): string {
   if (Array.isArray(value)) return firstText(value[0])
@@ -219,11 +230,13 @@ function exportCsv(items: CargoItem[]) {
 type CargoRowProps = {
   item: CargoItem
   copiedPid: string
+  isSelected: boolean
   isSpuFiltered: boolean
   onCopyPitch: (item: CargoItem) => void
   onCopyPid: (pid: string) => void
   onPreviewImage: (item: CargoItem) => void
   onSearchSpu: (spu: string) => void
+  onToggleSelection: (id: string) => void
 }
 
 type ImageThumbProps = {
@@ -255,9 +268,19 @@ const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
   )
 })
 
-const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopyPitch, onCopyPid, onPreviewImage, onSearchSpu }: CargoRowProps) {
+const CargoRow = memo(function CargoRow({ item, copiedPid, isSelected, isSpuFiltered, onCopyPitch, onCopyPid, onPreviewImage, onSearchSpu, onToggleSelection }: CargoRowProps) {
   return (
-    <tr>
+    <tr className={isSelected ? 'selected-row' : ''}>
+      <td className="basket-cell" data-label="选品篮">
+        <button
+          className={`basket-toggle${isSelected ? ' active' : ''}`}
+          type="button"
+          onClick={() => onToggleSelection(item.id)}
+          title={isSelected ? '移出选品篮' : '加入选品篮'}
+        >
+          {isSelected ? '已选' : '加入'}
+        </button>
+      </td>
       <td className="image-cell" data-label="图片">
         {item.imageLink ? (
           <button className="image-preview-trigger" type="button" onClick={() => onPreviewImage(item)} title="预览大图">
@@ -324,9 +347,11 @@ function App() {
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('全部')
   const [tagFilter, setTagFilter] = useState('全部')
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [sortBy, setSortBy] = useState<SortKey>('sales7')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(readSavedSelectedIds)
   const [previewItem, setPreviewItem] = useState<CargoItem | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [isPending, startTransition] = useTransition()
@@ -364,6 +389,17 @@ function App() {
     })
   }, [loadData])
 
+  useEffect(() => {
+    window.localStorage.setItem(BASKET_STORAGE_KEY, JSON.stringify(Array.from(selectedIds)))
+  }, [selectedIds])
+
+  const validSelectedIds = useMemo(() => {
+    if (!items.length) return selectedIds
+
+    const itemIds = new Set(items.map((item) => item.id))
+    return new Set(Array.from(selectedIds).filter((id) => itemIds.has(id)))
+  }, [items, selectedIds])
+
   const categories = useMemo(() => {
     const set = new Set(items.map((item) => item.leafCategory).filter(Boolean))
     return ['全部', ...Array.from(set).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))]
@@ -385,9 +421,10 @@ function App() {
     return items.filter((item) => {
       const inCategory = category === '全部' || item.leafCategory === category
       const inTag = tagFilter === '全部' || item.pickTags.some((tag) => tag.label === tagFilter)
-      return inCategory && inTag && (!key || item.searchable.includes(key))
+      const inBasket = !showSelectedOnly || validSelectedIds.has(item.id)
+      return inCategory && inTag && inBasket && (!key || item.searchable.includes(key))
     })
-  }, [items, keyword, category, tagFilter])
+  }, [items, keyword, category, tagFilter, showSelectedOnly, validSelectedIds])
 
   const sortedItems = useMemo(() => {
     const direction = sortDirection === 'desc' ? -1 : 1
@@ -401,6 +438,10 @@ function App() {
   const pageItems = useMemo(() => {
     return sortedItems.slice(pageStart, pageEnd)
   }, [sortedItems, pageStart, pageEnd])
+
+  const selectedItems = useMemo(() => {
+    return items.filter((item) => validSelectedIds.has(item.id))
+  }, [items, validSelectedIds])
 
   const stats = useMemo(() => {
     const spuSet = new Set<string>()
@@ -422,6 +463,30 @@ function App() {
       pidCount: pidSet.size,
     }
   }, [filteredItems])
+
+  const handleToggleSelection = useCallback((id: string) => {
+    setSelectedIds((current) => {
+      const next = new Set(current)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const handleCopySelectedPitch = useCallback(async () => {
+    if (!selectedItems.length) return
+
+    try {
+      await navigator.clipboard.writeText(selectedItems.map(buildPitchText).join('\n\n---\n\n'))
+      setCopiedPid('selected:pitch')
+      window.setTimeout(() => setCopiedPid((current) => (current === 'selected:pitch' ? '' : current)), 1200)
+    } catch {
+      setError('复制失败：浏览器没有开放剪贴板权限')
+    }
+  }, [selectedItems])
 
   const handleCopyPitch = useCallback(async (item: CargoItem) => {
     try {
@@ -522,7 +587,7 @@ function App() {
           <span>点击 SPU 查看同款所有 SKC</span>
           <span>点击图片预览大图，点击 PID 快速复制</span>
           <span>推荐标签按销量、上架天数和 PID 覆盖自动计算</span>
-          <span>使用「一键复制」获取完整推广信息</span>
+          <span>加入「选品篮」后可统一导出或复制推广信息</span>
         </div>
       </section>
 
@@ -618,6 +683,40 @@ function App() {
         {isPending && <div className="sort-pending">排序处理中…</div>}
       </section>
 
+      <section className="basket-bar">
+        <div>
+          <span>选品篮</span>
+          <strong>已选 {selectedItems.length} 款</strong>
+        </div>
+        <div className="basket-actions">
+          <button
+            type="button"
+            className={`secondary${showSelectedOnly ? ' active' : ''}`}
+            disabled={!selectedItems.length}
+            onClick={() => {
+              setShowSelectedOnly((current) => !current)
+              setCurrentPage(1)
+            }}
+          >
+            {showSelectedOnly ? '查看全部' : '只看已选'}
+          </button>
+          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems)}>导出已选</button>
+          <button type="button" disabled={!selectedItems.length} onClick={handleCopySelectedPitch}>{copiedPid === 'selected:pitch' ? '已复制' : '复制已选话术'}</button>
+          <button
+            type="button"
+            className="basket-clear"
+            disabled={!selectedItems.length}
+            onClick={() => {
+              setSelectedIds(new Set())
+              setShowSelectedOnly(false)
+              setCurrentPage(1)
+            }}
+          >
+            清空
+          </button>
+        </div>
+      </section>
+
       <section className="table-card">
         <div className="table-meta">
           <span>共 {items.length} 条数据，筛选后 {sortedItems.length} 条，当前展示 {sortedItems.length ? pageStart + 1 : 0}-{pageEnd} 条；导出会包含当前筛选结果</span>
@@ -631,6 +730,7 @@ function App() {
           <table>
             <thead>
               <tr>
+                <th>选品篮</th>
                 <th>图片</th>
                 <th>SPU / SKC</th>
                 <th>款号</th>
@@ -646,12 +746,12 @@ function App() {
             </thead>
             <tbody>
               {loading && !items.length ? (
-                <tr><td colSpan={11} className="empty">正在加载货盘数据…</td></tr>
+                <tr><td colSpan={12} className="empty">正在加载货盘数据…</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
-                return <CargoRow copiedPid={rowCopiedPid || (copiedPid === `pitch:${item.id}` ? copiedPid : '')} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPitch={handleCopyPitch} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
+                return <CargoRow copiedPid={rowCopiedPid || (copiedPid === `pitch:${item.id}` ? copiedPid : '')} isSelected={validSelectedIds.has(item.id)} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPitch={handleCopyPitch} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} onToggleSelection={handleToggleSelection} />
               }) : (
-                <tr><td colSpan={11} className="empty">没有匹配的数据</td></tr>
+                <tr><td colSpan={12} className="empty">没有匹配的数据</td></tr>
               )}
             </tbody>
           </table>

@@ -487,6 +487,69 @@ select:focus {
   box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
 }
 
+.basket-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.92), rgba(255, 255, 255, 0.86));
+}
+
+.basket-bar span,
+.basket-bar strong {
+  display: block;
+}
+
+.basket-bar span {
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.basket-bar strong {
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.basket-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.basket-actions button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.basket-actions .secondary.active {
+  color: #fff;
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.basket-clear {
+  color: #64748b;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.basket-clear:hover:not(:disabled) {
+  color: #b91c1c;
+  background: #fee2e2;
+  box-shadow: none;
+  transform: none;
+}
+
 .table-card {
   overflow: hidden;
   border-radius: 26px;
@@ -532,7 +595,7 @@ select:focus {
 
 table {
   width: 100%;
-  min-width: 1780px;
+  min-width: 1860px;
   border-collapse: collapse;
   background: #fff;
 }
@@ -605,6 +668,14 @@ tbody tr {
 
 tbody tr:hover {
   background: #f8fafc;
+}
+
+tbody tr.selected-row {
+  background: #fffbeb;
+}
+
+tbody tr.selected-row:hover {
+  background: #fef3c7;
 }
 
 td strong {
@@ -797,6 +868,34 @@ td small {
 .pick-tag.watch {
   color: #64748b;
   background: #f1f5f9;
+}
+
+.basket-cell {
+  min-width: 86px;
+}
+
+.basket-toggle {
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  color: #92400e;
+  background: #fffbeb;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.basket-toggle:hover:not(:disabled) {
+  background: #fef3c7;
+  box-shadow: none;
+  transform: none;
+}
+
+.basket-toggle.active {
+  color: #fff;
+  background: #f59e0b;
+  border-color: #f59e0b;
 }
 
 .pitch-cell {
@@ -997,6 +1096,15 @@ td small {
   .agency-guide-tips,
   .tag-rule-panel ul {
     grid-template-columns: 1fr;
+  }
+
+  .basket-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .basket-actions {
+    justify-content: flex-start;
   }
 
   .table-meta {
