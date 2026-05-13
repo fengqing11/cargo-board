@@ -493,10 +493,12 @@ select:focus {
   justify-content: space-between;
   gap: 16px;
   margin: 0 0 18px;
-  padding: 16px 18px;
-  border: 1px solid rgba(245, 158, 11, 0.24);
-  border-radius: 22px;
-  background: linear-gradient(135deg, rgba(255, 251, 235, 0.92), rgba(255, 255, 255, 0.86));
+  padding: 14px 16px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-left: 4px solid #f59e0b;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.045);
 }
 
 .basket-bar span,
@@ -505,29 +507,43 @@ select:focus {
 }
 
 .basket-bar span {
-  color: #92400e;
-  font-size: 13px;
+  color: #b45309;
+  font-size: 12px;
   font-weight: 900;
+  letter-spacing: 0.05em;
 }
 
 .basket-bar strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 4px;
   color: #0f172a;
-  font-size: 20px;
+  font-size: 18px;
+}
+
+.basket-bar strong::before {
+  width: 8px;
+  height: 8px;
+  content: '';
+  border-radius: 999px;
+  background: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.14);
 }
 
 .basket-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
 }
 
 .basket-actions button {
-  min-height: 34px;
-  padding: 7px 12px;
-  border-radius: 12px;
-  font-size: 13px;
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .basket-actions .secondary.active {
@@ -538,7 +554,7 @@ select:focus {
 
 .basket-clear {
   color: #64748b;
-  background: transparent;
+  background: #fff;
   border: 1px solid #e2e8f0;
   box-shadow: none;
 }
@@ -546,6 +562,7 @@ select:focus {
 .basket-clear:hover:not(:disabled) {
   color: #b91c1c;
   background: #fee2e2;
+  border-color: #fecaca;
   box-shadow: none;
   transform: none;
 }
@@ -671,11 +688,11 @@ tbody tr:hover {
 }
 
 tbody tr.selected-row {
-  background: #fffbeb;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255, 255, 255, 0) 280px), #fff;
 }
 
 tbody tr.selected-row:hover {
-  background: #fef3c7;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(255, 255, 255, 0) 280px), #f8fafc;
 }
 
 td strong {
@@ -876,26 +893,29 @@ td small {
 
 .basket-toggle {
   min-height: 30px;
-  padding: 6px 10px;
-  border: 1px solid #fcd34d;
+  padding: 6px 11px;
+  border: 1px solid #e2e8f0;
   border-radius: 999px;
-  color: #92400e;
-  background: #fffbeb;
+  color: #64748b;
+  background: #fff;
   box-shadow: none;
   font-size: 12px;
   font-weight: 900;
 }
 
 .basket-toggle:hover:not(:disabled) {
-  background: #fef3c7;
+  color: #b45309;
+  background: #fffbeb;
+  border-color: #fcd34d;
   box-shadow: none;
   transform: none;
 }
 
 .basket-toggle.active {
-  color: #fff;
-  background: #f59e0b;
+  color: #92400e;
+  background: #fef3c7;
   border-color: #f59e0b;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.12);
 }
 
 .pitch-cell {
