@@ -637,6 +637,40 @@ function App() {
         </button>
       </section>
 
+      <section className="basket-bar">
+        <div>
+          <span>选品篮</span>
+          <strong>已选 {selectedItems.length} 款</strong>
+        </div>
+        <div className="basket-actions">
+          <button
+            type="button"
+            className={`secondary${showSelectedOnly ? ' active' : ''}`}
+            disabled={!selectedItems.length}
+            onClick={() => {
+              setShowSelectedOnly((current) => !current)
+              setCurrentPage(1)
+            }}
+          >
+            {showSelectedOnly ? '查看全部' : '只看已选'}
+          </button>
+          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems)}>导出已选</button>
+          <button type="button" disabled={!selectedItems.length} onClick={handleCopySelectedPitch}>{copiedPid === 'selected:pitch' ? '已复制' : '复制已选话术'}</button>
+          <button
+            type="button"
+            className="basket-clear"
+            disabled={!selectedItems.length}
+            onClick={() => {
+              setSelectedIds(new Set())
+              setShowSelectedOnly(false)
+              setCurrentPage(1)
+            }}
+          >
+            清空
+          </button>
+        </div>
+      </section>
+
       <section className="toolbar">
         <label>
           <span>搜索</span>
@@ -712,40 +746,6 @@ function App() {
           </div>
         </div>
         {isPending && <div className="sort-pending">排序处理中…</div>}
-      </section>
-
-      <section className="basket-bar">
-        <div>
-          <span>选品篮</span>
-          <strong>已选 {selectedItems.length} 款</strong>
-        </div>
-        <div className="basket-actions">
-          <button
-            type="button"
-            className={`secondary${showSelectedOnly ? ' active' : ''}`}
-            disabled={!selectedItems.length}
-            onClick={() => {
-              setShowSelectedOnly((current) => !current)
-              setCurrentPage(1)
-            }}
-          >
-            {showSelectedOnly ? '查看全部' : '只看已选'}
-          </button>
-          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems)}>导出已选</button>
-          <button type="button" disabled={!selectedItems.length} onClick={handleCopySelectedPitch}>{copiedPid === 'selected:pitch' ? '已复制' : '复制已选话术'}</button>
-          <button
-            type="button"
-            className="basket-clear"
-            disabled={!selectedItems.length}
-            onClick={() => {
-              setSelectedIds(new Set())
-              setShowSelectedOnly(false)
-              setCurrentPage(1)
-            }}
-          >
-            清空
-          </button>
-        </div>
       </section>
 
       <section className="table-card">
