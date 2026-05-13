@@ -158,6 +158,28 @@ function normalizeRecord(record: RawRecord): CargoItem {
   }
 }
 
+function buildPitchText(item: CargoItem) {
+  const activePids = MARKET_KEYS
+    .map((key) => ({ market: MARKET_LABELS[key], pid: item.pids[key] }))
+    .filter(({ pid }) => pid && pid !== '-')
+    .map(({ market, pid }) => `${market}：${pid}`)
+
+  return [
+    `【${STORE_NAME} 货盘推荐】`,
+    `SPU：${item.spu || '-'}`,
+    `SKC：${item.skcId || '-'}`,
+    `款号：${item.styleNo || '-'}`,
+    `颜色：${item.color || '-'}`,
+    `类目：${item.leafCategory || item.category || '-'}`,
+    `选品标签：${item.pickTags.map((tag) => tag.label).join(' / ')}`,
+    `上架天数：${item.daysOnline ? `${item.daysOnline}天` : '-'}`,
+    `近7天销量：${item.sales7}`,
+    `近30天销量：${item.sales30}`,
+    activePids.length ? `各站 PID：\n${activePids.join('\n')}` : '各站 PID：暂无',
+    item.imageLink ? `图片：${item.imageLink}` : '',
+  ].filter(Boolean).join('\n')
+}
+
 function exportCsv(items: CargoItem[]) {
   const headers = ['店铺', '图片链接', 'SPU', 'SKC ID', '款号', '颜色', '类目', '选品标签', '运营', '上架天数', '近7天销量', '近30天销量', ...MARKET_KEYS]
   const rows = items.map((item) => [
@@ -191,6 +213,7 @@ type CargoRowProps = {
   item: CargoItem
   copiedPid: string
   isSpuFiltered: boolean
+  onCopyPitch: (item: CargoItem) => void
   onCopyPid: (pid: string) => void
   onPreviewImage: (item: CargoItem) => void
   onSearchSpu: (spu: string) => void
@@ -225,7 +248,7 @@ const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
   )
 })
 
-const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopyPid, onPreviewImage, onSearchSpu }: CargoRowProps) {
+const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopyPitch, onCopyPid, onPreviewImage, onSearchSpu }: CargoRowProps) {
   return (
     <tr>
       <td className="image-cell" data-label="图片">
@@ -258,6 +281,11 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopy
       <td data-label="上架天数">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
       <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label="7天销量">{item.sales7}</td>
       <td className={item.sales30 > 0 ? 'sales hot' : 'sales'} data-label="30天销量">{item.sales30}</td>
+      <td className="pitch-cell" data-label="一键复制">
+        <button className={`pitch-copy${copiedPid === `pitch:${item.id}` ? ' copied' : ''}`} type="button" onClick={() => onCopyPitch(item)}>
+          {copiedPid === `pitch:${item.id}` ? '已复制' : '一键复制'}
+        </button>
+      </td>
       <td className="pid-list" data-label="各站 PID">
         {MARKET_KEYS.map((key) => {
           const pid = item.pids[key]
@@ -379,6 +407,16 @@ function App() {
       pidCount: pidSet.size,
     }
   }, [filteredItems])
+
+  const handleCopyPitch = useCallback(async (item: CargoItem) => {
+    try {
+      await navigator.clipboard.writeText(buildPitchText(item))
+      setCopiedPid(`pitch:${item.id}`)
+      window.setTimeout(() => setCopiedPid((current) => (current === `pitch:${item.id}` ? '' : current)), 1200)
+    } catch {
+      setError('复制失败：浏览器没有开放剪贴板权限')
+    }
+  }, [])
 
   const handleCopyPid = useCallback(async (pid: string) => {
     if (!pid || pid === '-') return
@@ -557,17 +595,18 @@ function App() {
                 <th>{renderSortableHeader('daysOnline')}</th>
                 <th>{renderSortableHeader('sales7')}</th>
                 <th>{renderSortableHeader('sales30')}</th>
+                <th>一键复制</th>
                 <th>各站 PID</th>
               </tr>
             </thead>
             <tbody>
               {loading && !items.length ? (
-                <tr><td colSpan={10} className="empty">正在加载货盘数据…</td></tr>
+                <tr><td colSpan={11} className="empty">正在加载货盘数据…</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
-                return <CargoRow copiedPid={rowCopiedPid} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
+                return <CargoRow copiedPid={rowCopiedPid || (copiedPid === `pitch:${item.id}` ? copiedPid : '')} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPitch={handleCopyPitch} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
               }) : (
-                <tr><td colSpan={10} className="empty">没有匹配的数据</td></tr>
+                <tr><td colSpan={11} className="empty">没有匹配的数据</td></tr>
               )}
             </tbody>
           </table>

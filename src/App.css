@@ -391,7 +391,7 @@ select:focus {
 
 table {
   width: 100%;
-  min-width: 1660px;
+  min-width: 1780px;
   border-collapse: collapse;
   background: #fff;
 }
@@ -656,6 +656,32 @@ td small {
 .pick-tag.watch {
   color: #64748b;
   background: #f1f5f9;
+}
+
+.pitch-cell {
+  min-width: 108px;
+}
+
+.pitch-copy {
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: #dbeafe;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pitch-copy:hover:not(:disabled) {
+  background: #bfdbfe;
+  box-shadow: none;
+  transform: none;
+}
+
+.pitch-copy.copied {
+  color: #047857;
+  background: #d1fae5;
 }
 
 .pid-list {
