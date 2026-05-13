@@ -496,6 +496,19 @@ function App() {
         <div><span>有效 PID</span><strong>{stats.pidCount}</strong></div>
       </section>
 
+      <section className="agency-guide">
+        <div className="agency-guide-title">
+          <span>机构选品建议</span>
+          <strong>优先带货参考</strong>
+        </div>
+        <div className="agency-guide-tips">
+          <span>优先看「爆款」「稳定出单」「潜力新品」</span>
+          <span>点击 SPU 查看同款所有 SKC</span>
+          <span>点击图片预览大图，点击 PID 快速复制</span>
+          <span>使用「一键复制」获取完整推广信息</span>
+        </div>
+      </section>
+
       <section className="toolbar">
         <label>
           <span>搜索</span>
