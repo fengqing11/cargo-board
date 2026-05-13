@@ -1,4 +1,4 @@
-const res = await fetch('http://117.72.67.127:30080/wps/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task', {
+const res = await fetch('https://www.kdocs.cn/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task', {
   method: 'POST',
   headers: {
     'AirScript-Token': '6fGqU99bv52z1X4GgGwyoV',

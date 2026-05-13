@@ -1,4 +1,4 @@
-const KDOCS_API = 'http://117.72.67.127:30080/wps/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task'
+const KDOCS_API = 'https://www.kdocs.cn/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task'
 const AIRSCRIPT_TOKEN = '6fGqU99bv52z1X4GgGwyoV'
 
 export const onRequestPost: PagesFunction = async ({ request }) => {
