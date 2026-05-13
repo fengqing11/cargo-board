@@ -8,7 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# Cloudflare Pages currently deploys this project from the checked-in output directory.
+# Keep dist committed so Pages can find the configured output even if dashboard build command is empty.
 dist-ssr
 *.local
 
