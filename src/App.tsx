@@ -29,6 +29,8 @@ type CargoItem = {
 type SortKey = 'sales30' | 'sales7' | 'daysOnline'
 
 const STORE_NAME = 'TTS-烛照'
+const CARGO_API = 'http://117.72.67.127:30080/wps/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task'
+const AIRSCRIPT_TOKEN = '6fGqU99bv52z1X4GgGwyoV'
 const MARKET_KEYS = [
   'PID-US（美国）',
   'PID-GB（英国）',
@@ -192,9 +194,12 @@ function App() {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch('/api/cargo', {
+      const response = await fetch(CARGO_API, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'AirScript-Token': AIRSCRIPT_TOKEN,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ Context: { argv: { store_name: STORE_NAME } } }),
       })
       if (!response.ok) throw new Error(`接口请求失败：${response.status}`)
