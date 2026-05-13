@@ -245,23 +245,16 @@ function App() {
     const skcSet = new Set<string>()
     const pidSet = new Set<string>()
 
-    const totals = filteredItems.reduce(
-      (acc, item) => {
-        if (item.spu) spuSet.add(item.spu)
-        if (item.skcId) skcSet.add(item.skcId)
-        MARKET_KEYS.forEach((key) => {
-          const pid = item.pids[key]
-          if (pid && pid !== '-') pidSet.add(pid)
-        })
-        acc.totalSales7 += item.sales7
-        acc.totalSales30 += item.sales30
-        return acc
-      },
-      { totalSales7: 0, totalSales30: 0 },
-    )
+    filteredItems.forEach((item) => {
+      if (item.spu) spuSet.add(item.spu)
+      if (item.skcId) skcSet.add(item.skcId)
+      MARKET_KEYS.forEach((key) => {
+        const pid = item.pids[key]
+        if (pid && pid !== '-') pidSet.add(pid)
+      })
+    })
 
     return {
-      ...totals,
       spuCount: spuSet.size,
       skcCount: skcSet.size,
       pidCount: pidSet.size,
@@ -329,8 +322,6 @@ function App() {
       <section className="stats-grid">
         <div><span>SPU 数</span><strong>{stats.spuCount}</strong></div>
         <div><span>SKC 数量</span><strong>{stats.skcCount}</strong></div>
-        <div><span>近 7 天销量</span><strong>{stats.totalSales7}</strong></div>
-        <div><span>近 30 天销量</span><strong>{stats.totalSales30}</strong></div>
         <div><span>有效 PID</span><strong>{stats.pidCount}</strong></div>
       </section>
 
