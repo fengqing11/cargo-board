@@ -376,7 +376,10 @@ td small {
 }
 
 .image-cell a {
+  position: relative;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 72px;
   height: 72px;
   overflow: hidden;
@@ -387,14 +390,50 @@ td small {
 }
 
 .image-cell img {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.18s ease;
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.image-cell a:hover img {
+.image-cell img.loaded {
+  opacity: 1;
+}
+
+.image-cell a:hover img.loaded {
   transform: scale(1.06);
+}
+
+.image-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.1s linear infinite;
+}
+
+.image-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  color: #94a3b8;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+@keyframes skeleton-loading {
+  to {
+    background-position-x: -200%;
+  }
 }
 
 .no-image {

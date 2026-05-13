@@ -146,13 +146,42 @@ type CargoRowProps = {
   onCopyPid: (pid: string) => void
 }
 
+type ImageThumbProps = {
+  src: string
+  alt: string
+}
+
+const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
+  const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  if (failed) {
+    return <span className="image-fallback">图片失效</span>
+  }
+
+  return (
+    <>
+      {!loaded && <span className="image-skeleton" aria-hidden="true" />}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className={loaded ? 'loaded' : ''}
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+      />
+    </>
+  )
+})
+
 const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid }: CargoRowProps) {
   return (
     <tr>
       <td className="image-cell" data-label="图片">
         {item.imageLink ? (
           <a href={item.imageLink} target="_blank" rel="noreferrer" title="点击查看原图">
-            <img src={item.imageLink} alt={item.styleNo || item.spu || '商品图片'} loading="lazy" />
+            <ImageThumb key={item.imageLink} src={item.imageLink} alt={item.styleNo || item.spu || '商品图片'} />
           </a>
         ) : <span className="no-image">无图</span>}
       </td>
