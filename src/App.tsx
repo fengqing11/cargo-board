@@ -63,6 +63,8 @@ const SORT_LABELS: Record<SortKey, string> = {
   sales7: '7天销量',
   daysOnline: '上架天数',
 }
+const PAGE_SIZE = 50
+const MIN_GOOD_PID_COUNT = 3
 const TAG_TONES: Record<string, PickTag['tone']> = {
   爆款: 'hot',
   潜力新品: 'new',
@@ -70,9 +72,14 @@ const TAG_TONES: Record<string, PickTag['tone']> = {
   多站点: 'coverage',
   待观察: 'watch',
 }
+const TAG_DESCRIPTIONS: Record<string, string> = {
+  爆款: '近7天销量较高，或近期销量动能明显',
+  稳定出单: '近30天销量稳定，且近7天仍有销量',
+  潜力新品: '上架30天内，且近7天已有销量',
+  多站点: `有效 PID 覆盖不少于 ${MIN_GOOD_PID_COUNT} 个站点`,
+  待观察: '暂未出现明显销量、上新或多站点覆盖信号',
+}
 const TAG_ORDER = ['爆款', '稳定出单', '潜力新品', '多站点', '待观察']
-const PAGE_SIZE = 50
-const MIN_GOOD_PID_COUNT = 3
 
 function firstText(value: unknown): string {
   if (Array.isArray(value)) return firstText(value[0])
@@ -276,7 +283,7 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopy
       <td data-label="颜色">{item.color || '-'}</td>
       <td className="category" data-label="类目" title={item.category}>{item.leafCategory || '-'}</td>
       <td className="pick-tags" data-label="推荐标签">
-        {item.pickTags.map((tag) => <span className={`pick-tag ${tag.tone}`} key={tag.label}>{tag.label}</span>)}
+        {item.pickTags.map((tag) => <span className={`pick-tag ${tag.tone}`} key={tag.label} title={TAG_DESCRIPTIONS[tag.label]}>{tag.label}</span>)}
       </td>
       <td data-label="上架天数">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
       <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label="7天销量">{item.sales7}</td>
@@ -514,8 +521,24 @@ function App() {
           <span>优先看「爆款」「稳定出单」「潜力新品」</span>
           <span>点击 SPU 查看同款所有 SKC</span>
           <span>点击图片预览大图，点击 PID 快速复制</span>
+          <span>推荐标签按销量、上架天数和 PID 覆盖自动计算</span>
           <span>使用「一键复制」获取完整推广信息</span>
         </div>
+      </section>
+
+      <section className="tag-rule-panel">
+        <div>
+          <span>推荐标签规则</span>
+          <strong>自动计算，仅供选品参考</strong>
+        </div>
+        <ul>
+          {TAG_ORDER.map((name) => (
+            <li key={name}>
+              <span className={`pick-tag ${TAG_TONES[name]}`}>{name}</span>
+              <em>{TAG_DESCRIPTIONS[name]}</em>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="toolbar">
@@ -587,7 +610,7 @@ function App() {
                   setCurrentPage(1)
                 }}
               >
-                {name}
+                <span>{name}</span>
               </button>
             ))}
           </div>

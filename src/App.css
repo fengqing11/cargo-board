@@ -265,6 +265,76 @@ button.pid-chip em {
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
+.tag-rule-panel {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.045);
+}
+
+.tag-rule-panel > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fafc, #eef6ff);
+}
+
+.tag-rule-panel > div span,
+.tag-rule-panel > div strong {
+  display: block;
+}
+
+.tag-rule-panel > div span {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.tag-rule-panel > div strong {
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.tag-rule-panel ul {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-rule-panel li {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.tag-rule-panel .pick-tag {
+  margin-bottom: 8px;
+}
+
+.tag-rule-panel em {
+  display: block;
+  color: #475569;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.55;
+}
+
 .toolbar {
   display: grid;
   grid-template-columns: 2fr 1fr 2fr auto;
@@ -912,7 +982,8 @@ td small {
     grid-template-columns: 1fr;
   }
 
-  .agency-guide {
+  .agency-guide,
+  .tag-rule-panel {
     grid-template-columns: 1fr;
   }
 
@@ -923,7 +994,8 @@ td small {
     border-bottom: 1px solid rgba(148, 163, 184, 0.28);
   }
 
-  .agency-guide-tips {
+  .agency-guide-tips,
+  .tag-rule-panel ul {
     grid-template-columns: 1fr;
   }
 
