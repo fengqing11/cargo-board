@@ -144,6 +144,7 @@ type CargoRowProps = {
   item: CargoItem
   copiedPid: string
   onCopyPid: (pid: string) => void
+  onSearchSpu: (spu: string) => void
 }
 
 type ImageThumbProps = {
@@ -175,7 +176,7 @@ const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
   )
 })
 
-const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid }: CargoRowProps) {
+const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid, onSearchSpu }: CargoRowProps) {
   return (
     <tr>
       <td className="image-cell" data-label="图片">
@@ -185,7 +186,15 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid }: CargoRow
           </a>
         ) : <span className="no-image">无图</span>}
       </td>
-      <td data-label="SPU / SKC"><strong>{item.spu || '-'}</strong><small>{item.skcId || '-'}</small></td>
+      <td data-label="SPU / SKC">
+        {item.spu ? (
+          <button className="spu-link" type="button" onClick={() => onSearchSpu(item.spu)} title={`点击筛选该 SPU 下所有 SKC：${item.spu}`}>
+            <span>{item.spu}</span>
+            <em>筛选</em>
+          </button>
+        ) : <strong>-</strong>}
+        <small>{item.skcId || '-'}</small>
+      </td>
       <td data-label="款号">{item.styleNo || '-'}</td>
       <td data-label="颜色">{item.color || '-'}</td>
       <td className="category" data-label="类目" title={item.category}>{item.leafCategory || '-'}</td>
@@ -328,6 +337,11 @@ function App() {
     setCurrentPage(Math.min(Math.max(page, 1), totalPages))
   }
 
+  function handleSearchSpu(spu: string) {
+    setKeyword((current) => (current.trim() === spu ? '' : spu))
+    setCurrentPage(1)
+  }
+
   function renderSortableHeader(value: SortKey) {
     const active = sortBy === value
     const nextDirection = active && sortDirection === 'desc' ? 'asc' : 'desc'
@@ -372,26 +386,58 @@ function App() {
       <section className="toolbar">
         <label>
           <span>搜索</span>
-          <input
-            value={keyword}
-            onChange={(e) => {
-              setKeyword(e.target.value)
-              setCurrentPage(1)
-            }}
-            placeholder="SPU / SKC / 款号 / 颜色"
-          />
+          <div className="search-field">
+            <input
+              value={keyword}
+              onChange={(e) => {
+                setKeyword(e.target.value)
+                setCurrentPage(1)
+              }}
+              placeholder="SPU / SKC / 款号 / 颜色"
+            />
+            {keyword && (
+              <button
+                type="button"
+                className="clear-search"
+                onClick={() => {
+                  setKeyword('')
+                  setCurrentPage(1)
+                }}
+                aria-label="清空搜索"
+                title="清空搜索"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </label>
         <label>
           <span>类目</span>
-          <select
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value)
-              setCurrentPage(1)
-            }}
-          >
-            {categories.map((name) => <option key={name} value={name}>{name}</option>)}
-          </select>
+          <div className="select-field">
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value)
+                setCurrentPage(1)
+              }}
+            >
+              {categories.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
+            {category !== '全部' && (
+              <button
+                type="button"
+                className="clear-filter"
+                onClick={() => {
+                  setCategory('全部')
+                  setCurrentPage(1)
+                }}
+                aria-label="清空类目筛选"
+                title="清空类目筛选"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </label>
         {isPending && <div className="sort-pending">排序处理中…</div>}
       </section>
@@ -425,7 +471,7 @@ function App() {
                 <tr><td colSpan={9} className="empty">正在加载货盘数据…</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
-                return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} />
+                return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} onSearchSpu={handleSearchSpu} />
               }) : (
                 <tr><td colSpan={9} className="empty">没有匹配的数据</td></tr>
               )}
