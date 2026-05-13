@@ -143,6 +143,7 @@ function exportCsv(items: CargoItem[]) {
 type CargoRowProps = {
   item: CargoItem
   copiedPid: string
+  isSpuFiltered: boolean
   onCopyPid: (pid: string) => void
   onPreviewImage: (item: CargoItem) => void
   onSearchSpu: (spu: string) => void
@@ -177,7 +178,7 @@ const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
   )
 })
 
-const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid, onPreviewImage, onSearchSpu }: CargoRowProps) {
+const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopyPid, onPreviewImage, onSearchSpu }: CargoRowProps) {
   return (
     <tr>
       <td className="image-cell" data-label="图片">
@@ -189,9 +190,14 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, onCopyPid, onPreviewI
       </td>
       <td data-label="SPU / SKC">
         {item.spu ? (
-          <button className="spu-link" type="button" onClick={() => onSearchSpu(item.spu)} title={`点击筛选该 SPU 下所有 SKC：${item.spu}`}>
+          <button
+            className={`spu-link${isSpuFiltered ? ' active' : ''}`}
+            type="button"
+            onClick={() => onSearchSpu(item.spu)}
+            title={isSpuFiltered ? `取消筛选 SPU：${item.spu}` : `点击筛选该 SPU 下所有 SKC：${item.spu}`}
+          >
             <span>{item.spu}</span>
-            <em>筛选</em>
+            <em>{isSpuFiltered ? '取消筛选' : '筛选'}</em>
           </button>
         ) : <strong>-</strong>}
         <small>{item.skcId || '-'}</small>
@@ -477,7 +483,7 @@ function App() {
                 <tr><td colSpan={9} className="empty">正在加载货盘数据…</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
-                return <CargoRow copiedPid={rowCopiedPid} item={item} key={item.id} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
+                return <CargoRow copiedPid={rowCopiedPid} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
               }) : (
                 <tr><td colSpan={9} className="empty">没有匹配的数据</td></tr>
               )}
