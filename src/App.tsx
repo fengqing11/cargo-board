@@ -81,6 +81,17 @@ const TAG_DESCRIPTIONS: Record<string, string> = {
 }
 const TAG_ORDER = ['爆款', '稳定出单', '潜力新品', '多站点', '待观察']
 const BASKET_STORAGE_KEY = 'cargo-board:selected-items'
+const GUIDE_COLLAPSED_STORAGE_KEY = 'cargo-board:guide-collapsed'
+const RULES_COLLAPSED_STORAGE_KEY = 'cargo-board:rules-collapsed'
+
+function readSavedBoolean(key: string, fallback = false) {
+  try {
+    const raw = window.localStorage.getItem(key)
+    return raw == null ? fallback : raw === 'true'
+  } catch {
+    return fallback
+  }
+}
 
 function readSavedSelectedIds() {
   try {
@@ -348,6 +359,8 @@ function App() {
   const [category, setCategory] = useState('全部')
   const [tagFilter, setTagFilter] = useState('全部')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
+  const [guideCollapsed, setGuideCollapsed] = useState(() => readSavedBoolean(GUIDE_COLLAPSED_STORAGE_KEY))
+  const [rulesCollapsed, setRulesCollapsed] = useState(() => readSavedBoolean(RULES_COLLAPSED_STORAGE_KEY))
   const [sortBy, setSortBy] = useState<SortKey>('sales7')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
@@ -392,6 +405,14 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem(BASKET_STORAGE_KEY, JSON.stringify(Array.from(selectedIds)))
   }, [selectedIds])
+
+  useEffect(() => {
+    window.localStorage.setItem(GUIDE_COLLAPSED_STORAGE_KEY, String(guideCollapsed))
+  }, [guideCollapsed])
+
+  useEffect(() => {
+    window.localStorage.setItem(RULES_COLLAPSED_STORAGE_KEY, String(rulesCollapsed))
+  }, [rulesCollapsed])
 
   const validSelectedIds = useMemo(() => {
     if (!items.length) return selectedIds
@@ -577,33 +598,43 @@ function App() {
         <div><span>数据更新时间</span><strong className="updated-at">{updatedAt || '加载中'}</strong></div>
       </section>
 
-      <section className="agency-guide">
+      <section className={`agency-guide${guideCollapsed ? ' collapsed' : ''}`}>
         <div className="agency-guide-title">
           <span>机构选品建议</span>
           <strong>优先带货参考</strong>
         </div>
-        <div className="agency-guide-tips">
-          <span>优先看「爆款」「稳定出单」「潜力新品」</span>
-          <span>点击 SPU 查看同款所有 SKC</span>
-          <span>点击图片预览大图，点击 PID 快速复制</span>
-          <span>推荐标签按销量、上架天数和 PID 覆盖自动计算</span>
-          <span>加入「选品篮」后可统一导出或复制推广信息</span>
-        </div>
+        {!guideCollapsed && (
+          <div className="agency-guide-tips">
+            <span>优先看「爆款」「稳定出单」「潜力新品」</span>
+            <span>点击 SPU 查看同款所有 SKC</span>
+            <span>点击图片预览大图，点击 PID 快速复制</span>
+            <span>推荐标签按销量、上架天数和 PID 覆盖自动计算</span>
+            <span>加入「选品篮」后可统一导出或复制推广信息</span>
+          </div>
+        )}
+        <button className="section-toggle" type="button" onClick={() => setGuideCollapsed((current) => !current)}>
+          {guideCollapsed ? '展开' : '收起'}
+        </button>
       </section>
 
-      <section className="tag-rule-panel">
+      <section className={`tag-rule-panel${rulesCollapsed ? ' collapsed' : ''}`}>
         <div>
           <span>推荐标签规则</span>
           <strong>自动计算，仅供选品参考</strong>
         </div>
-        <ul>
-          {TAG_ORDER.map((name) => (
-            <li key={name}>
-              <span className={`pick-tag ${TAG_TONES[name]}`}>{name}</span>
-              <em>{TAG_DESCRIPTIONS[name]}</em>
-            </li>
-          ))}
-        </ul>
+        {!rulesCollapsed && (
+          <ul>
+            {TAG_ORDER.map((name) => (
+              <li key={name}>
+                <span className={`pick-tag ${TAG_TONES[name]}`}>{name}</span>
+                <em>{TAG_DESCRIPTIONS[name]}</em>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button className="section-toggle" type="button" onClick={() => setRulesCollapsed((current) => !current)}>
+          {rulesCollapsed ? '展开' : '收起'}
+        </button>
       </section>
 
       <section className="toolbar">

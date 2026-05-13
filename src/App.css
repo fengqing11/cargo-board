@@ -201,7 +201,7 @@ button.pid-chip em {
 
 .agency-guide {
   display: grid;
-  grid-template-columns: 168px 1fr;
+  grid-template-columns: 168px 1fr auto;
   gap: 16px;
   align-items: center;
   margin: 0 0 16px;
@@ -211,6 +211,10 @@ button.pid-chip em {
   border-radius: 18px;
   color: #475569;
   background: rgba(248, 250, 252, 0.78);
+}
+
+.agency-guide.collapsed {
+  grid-template-columns: 1fr auto;
 }
 
 .agency-guide-title {
@@ -268,7 +272,7 @@ button.pid-chip em {
 
 .tag-rule-panel {
   display: grid;
-  grid-template-columns: 168px 1fr;
+  grid-template-columns: 168px 1fr auto;
   gap: 16px;
   align-items: center;
   margin: 0 0 16px;
@@ -277,6 +281,10 @@ button.pid-chip em {
   border-left: 4px solid #64748b;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.78);
+}
+
+.tag-rule-panel.collapsed {
+  grid-template-columns: 1fr auto;
 }
 
 .tag-rule-panel > div {
@@ -334,6 +342,26 @@ button.pid-chip em {
   font-style: normal;
   line-height: 1.4;
   white-space: nowrap;
+}
+
+.section-toggle {
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #64748b;
+  background: #fff;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.section-toggle:hover:not(:disabled) {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  box-shadow: none;
+  transform: none;
 }
 
 .toolbar {
@@ -634,6 +662,58 @@ th {
   background: #f8fafc;
   font-size: 13px;
   white-space: nowrap;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  width: 86px;
+  min-width: 86px;
+  background: inherit;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  position: sticky;
+  left: 86px;
+  z-index: 3;
+  width: 96px;
+  min-width: 96px;
+  background: inherit;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  position: sticky;
+  left: 182px;
+  z-index: 3;
+  width: 156px;
+  min-width: 156px;
+  background: inherit;
+  box-shadow: 10px 0 18px rgba(15, 23, 42, 0.04);
+}
+
+thead th:nth-child(-n + 3) {
+  z-index: 5;
+  background: #f8fafc;
+}
+
+tbody td:nth-child(-n + 3) {
+  background: #fff;
+}
+
+tbody tr:hover td:nth-child(-n + 3) {
+  background: #f8fafc;
+}
+
+tbody tr.selected-row td:nth-child(-n + 3) {
+  background: #fff7ed;
+}
+
+tbody tr.selected-row:hover td:nth-child(-n + 3) {
+  background: #fffbeb;
 }
 
 .sort-header {
@@ -1103,7 +1183,9 @@ td small {
   }
 
   .agency-guide,
-  .tag-rule-panel {
+  .agency-guide.collapsed,
+  .tag-rule-panel,
+  .tag-rule-panel.collapsed {
     grid-template-columns: 1fr;
   }
 
