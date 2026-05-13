@@ -24,6 +24,12 @@ type CargoItem = {
   pids: Record<string, string>
   searchable: string
   pidCount: number
+  pickTags: PickTag[]
+}
+
+type PickTag = {
+  label: string
+  tone: 'hot' | 'new' | 'stable' | 'coverage' | 'watch'
 }
 
 type SortKey = 'sales30' | 'sales7' | 'daysOnline'
@@ -58,6 +64,7 @@ const SORT_LABELS: Record<SortKey, string> = {
   daysOnline: '上架天数',
 }
 const PAGE_SIZE = 50
+const MIN_GOOD_PID_COUNT = 3
 
 function firstText(value: unknown): string {
   if (Array.isArray(value)) return firstText(value[0])
@@ -77,6 +84,34 @@ function cleanImageLink(value: unknown): string {
 
 function leafCategory(category: string) {
   return category.split('>').at(-1)?.trim() || category || '-'
+}
+
+function buildPickTags(item: Omit<CargoItem, 'searchable' | 'pidCount' | 'pickTags'>, pidCount: number): PickTag[] {
+  const tags: PickTag[] = []
+  const isNew = item.daysOnline > 0 && item.daysOnline <= 30
+  const salesMomentum = item.sales7 * 4 >= Math.max(item.sales30, 1)
+
+  if (item.sales7 >= 10 || (item.sales7 >= 5 && salesMomentum)) {
+    tags.push({ label: '爆款', tone: 'hot' })
+  }
+
+  if (isNew && item.sales7 > 0) {
+    tags.push({ label: '潜力新品', tone: 'new' })
+  }
+
+  if (item.sales30 >= 20 && item.sales7 > 0) {
+    tags.push({ label: '稳定出单', tone: 'stable' })
+  }
+
+  if (pidCount >= MIN_GOOD_PID_COUNT) {
+    tags.push({ label: '多站点', tone: 'coverage' })
+  }
+
+  if (!tags.length) {
+    tags.push({ label: '待观察', tone: 'watch' })
+  }
+
+  return tags.slice(0, 3)
 }
 
 function normalizeRecord(record: RawRecord): CargoItem {
@@ -103,17 +138,20 @@ function normalizeRecord(record: RawRecord): CargoItem {
     pids,
   }
 
+  const pidCount = MARKET_KEYS.reduce((sum, key) => sum + (pids[key] && pids[key] !== '-' ? 1 : 0), 0)
+
   return {
     ...item,
     searchable: [item.spu, item.skcId, item.styleNo, item.color, item.category, item.account]
       .join(' ')
       .toLowerCase(),
-    pidCount: MARKET_KEYS.reduce((sum, key) => sum + (pids[key] && pids[key] !== '-' ? 1 : 0), 0),
+    pidCount,
+    pickTags: buildPickTags(item, pidCount),
   }
 }
 
 function exportCsv(items: CargoItem[]) {
-  const headers = ['店铺', '图片链接', 'SPU', 'SKC ID', '款号', '颜色', '类目', '运营', '上架天数', '近7天销量', '近30天销量', ...MARKET_KEYS]
+  const headers = ['店铺', '图片链接', 'SPU', 'SKC ID', '款号', '颜色', '类目', '选品标签', '运营', '上架天数', '近7天销量', '近30天销量', ...MARKET_KEYS]
   const rows = items.map((item) => [
     item.store,
     item.imageLink,
@@ -122,6 +160,7 @@ function exportCsv(items: CargoItem[]) {
     item.styleNo,
     item.color,
     item.category,
+    item.pickTags.map((tag) => tag.label).join(' / '),
     item.operator,
     item.daysOnline,
     item.sales7,
@@ -205,6 +244,9 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, isSpuFiltered, onCopy
       <td data-label="款号">{item.styleNo || '-'}</td>
       <td data-label="颜色">{item.color || '-'}</td>
       <td className="category" data-label="类目" title={item.category}>{item.leafCategory || '-'}</td>
+      <td className="pick-tags" data-label="推荐标签">
+        {item.pickTags.map((tag) => <span className={`pick-tag ${tag.tone}`} key={tag.label}>{tag.label}</span>)}
+      </td>
       <td data-label="上架天数">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
       <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label="7天销量">{item.sales7}</td>
       <td className={item.sales30 > 0 ? 'sales hot' : 'sales'} data-label="30天销量">{item.sales30}</td>
@@ -472,6 +514,7 @@ function App() {
                 <th>款号</th>
                 <th>颜色</th>
                 <th>类目</th>
+                <th>推荐标签</th>
                 <th>{renderSortableHeader('daysOnline')}</th>
                 <th>{renderSortableHeader('sales7')}</th>
                 <th>{renderSortableHeader('sales30')}</th>
@@ -480,12 +523,12 @@ function App() {
             </thead>
             <tbody>
               {loading && !items.length ? (
-                <tr><td colSpan={9} className="empty">正在加载货盘数据…</td></tr>
+                <tr><td colSpan={10} className="empty">正在加载货盘数据…</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
                 return <CargoRow copiedPid={rowCopiedPid} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} />
               }) : (
-                <tr><td colSpan={9} className="empty">没有匹配的数据</td></tr>
+                <tr><td colSpan={10} className="empty">没有匹配的数据</td></tr>
               )}
             </tbody>
           </table>

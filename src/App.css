@@ -327,7 +327,7 @@ select:focus {
 
 table {
   width: 100%;
-  min-width: 1520px;
+  min-width: 1660px;
   border-collapse: collapse;
   background: #fff;
 }
@@ -551,6 +551,47 @@ td small {
 .category {
   max-width: 260px;
   color: #475569;
+}
+
+.pick-tags {
+  min-width: 160px;
+}
+
+.pick-tag {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 6px 6px 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pick-tag.hot {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.pick-tag.new {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.pick-tag.stable {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.pick-tag.coverage {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+
+.pick-tag.watch {
+  color: #64748b;
+  background: #f1f5f9;
 }
 
 .pid-list {
