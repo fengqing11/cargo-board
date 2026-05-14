@@ -36,6 +36,7 @@ type SortKey = 'sales30' | 'sales7' | 'daysOnline'
 type SortDirection = 'asc' | 'desc'
 
 const STORE_NAME = 'TTS-烛照'
+const DISPLAY_NAME = 'TTS-Chic NVF'
 const MARKET_KEYS = [
   'PID-US（美国）',
   'PID-GB（英国）',
@@ -194,7 +195,7 @@ function buildPitchText(item: CargoItem) {
     .map(({ market, pid }) => `${market}：${pid}`)
 
   return [
-    `【${STORE_NAME} 货盘推荐】`,
+    `【${DISPLAY_NAME} 货盘推荐】`,
     `SPU：${item.spu || '-'}`,
     `SKC：${item.skcId || '-'}`,
     `款号：${item.styleNo || '-'}`,
@@ -233,7 +234,7 @@ function exportCsv(items: CargoItem[]) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${STORE_NAME}-货盘表.csv`
+  a.download = `${DISPLAY_NAME}-货盘.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -580,7 +581,7 @@ function App() {
       <header className="hero-card">
         <div>
           <p className="eyebrow">Cargo Board</p>
-          <h1>{STORE_NAME} 货盘表</h1>
+          <h1>{DISPLAY_NAME} 货盘</h1>
           <p className="sub-title">实时读取金山 AirScript 接口，支持搜索、类目筛选、标签选品、销量排序，并可导出当前筛选结果。</p>
         </div>
         <div className="actions">
