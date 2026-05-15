@@ -42,8 +42,8 @@ select {
   align-items: flex-end;
   justify-content: space-between;
   gap: 28px;
-  padding: 30px;
-  border-radius: 28px;
+  padding: 24px 26px;
+  border-radius: 26px;
 }
 
 .hero-copy {
@@ -128,8 +128,9 @@ h1 {
 
 .sub-title {
   max-width: 760px;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: #64748b;
+  line-height: 1.55;
 }
 
 .actions {
@@ -221,15 +222,15 @@ button.pid-chip em {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin: 18px 0;
+  gap: 12px;
+  margin: 14px 0;
 }
 
 .stats-grid > div {
   position: relative;
   overflow: hidden;
-  padding: 22px;
-  border-radius: 22px;
+  padding: 16px 18px;
+  border-radius: 18px;
 }
 
 .stats-grid > div::after {
@@ -251,29 +252,29 @@ button.pid-chip em {
 
 .stats-grid strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #0f172a;
-  font-size: 34px;
+  font-size: 28px;
   line-height: 1;
 }
 
 .stats-grid .updated-at {
-  font-size: 26px;
+  font-size: 22px;
   letter-spacing: -0.03em;
 }
 
 .agency-guide {
   display: grid;
-  grid-template-columns: 168px 1fr auto;
-  gap: 16px;
+  grid-template-columns: 150px 1fr auto;
+  gap: 12px;
   align-items: center;
-  margin: 0 0 16px;
-  padding: 14px 16px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
   border: 1px solid #dbeafe;
   border-left: 4px solid #2563eb;
-  border-radius: 18px;
+  border-radius: 16px;
   color: #475569;
-  background: rgba(248, 250, 252, 0.78);
+  background: rgba(248, 250, 252, 0.72);
 }
 
 .agency-guide.collapsed {
@@ -298,27 +299,27 @@ button.pid-chip em {
 }
 
 .agency-guide-title strong {
-  margin-top: 5px;
+  margin-top: 4px;
   color: #0f172a;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.2;
 }
 
 .agency-guide-tips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .agency-guide-tips span {
   display: inline-flex;
   align-items: center;
-  min-height: 26px;
-  padding: 5px 9px;
+  min-height: 24px;
+  padding: 4px 8px;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   color: #475569;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.82);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.35;
@@ -335,15 +336,15 @@ button.pid-chip em {
 
 .tag-rule-panel {
   display: grid;
-  grid-template-columns: 168px 1fr auto;
-  gap: 16px;
+  grid-template-columns: 150px 1fr auto;
+  gap: 12px;
   align-items: center;
-  margin: 0 0 16px;
-  padding: 14px 16px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
   border: 1px solid #e2e8f0;
   border-left: 4px solid #64748b;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.66);
 }
 
 .tag-rule-panel.collapsed {
@@ -368,9 +369,9 @@ button.pid-chip em {
 }
 
 .tag-rule-panel > div strong {
-  margin-top: 5px;
+  margin-top: 4px;
   color: #0f172a;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.25;
 }
 
@@ -408,12 +409,12 @@ button.pid-chip em {
 }
 
 .section-toggle {
-  min-height: 30px;
-  padding: 6px 10px;
+  min-height: 28px;
+  padding: 5px 10px;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   color: #64748b;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   box-shadow: none;
   font-size: 12px;
   font-weight: 800;
@@ -430,11 +431,11 @@ button.pid-chip em {
 .toolbar {
   display: grid;
   grid-template-columns: 2fr 1fr 2fr auto;
-  gap: 16px;
+  gap: 14px;
   align-items: end;
-  padding: 18px;
-  border-radius: 22px;
-  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: 18px;
+  margin-bottom: 14px;
 }
 
 .sort-pending {
@@ -583,14 +584,14 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin: 0 0 18px;
-  padding: 14px 16px;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-left: 4px solid #f59e0b;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.045);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.035);
 }
 
 .basket-bar span,
@@ -609,9 +610,9 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: 3px;
   color: #0f172a;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .basket-bar strong::before {

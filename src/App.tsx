@@ -413,7 +413,7 @@ function App() {
   const [tagFilter, setTagFilter] = useState('全部')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [guideCollapsed, setGuideCollapsed] = useState(() => readSavedBoolean(GUIDE_COLLAPSED_STORAGE_KEY))
-  const [rulesCollapsed, setRulesCollapsed] = useState(() => readSavedBoolean(RULES_COLLAPSED_STORAGE_KEY))
+  const [rulesCollapsed, setRulesCollapsed] = useState(() => readSavedBoolean(RULES_COLLAPSED_STORAGE_KEY, true))
   const [sortBy, setSortBy] = useState<SortKey>('sales7')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [copiedPid, setCopiedPid] = useState('')
