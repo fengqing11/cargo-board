@@ -12,6 +12,8 @@ const PORT = Number(process.env.PORT || 5173)
 const KDOCS_API = process.env.KDOCS_API || 'https://www.kdocs.cn/api/v3/ide/file/csDYhtk0UKaq/script/V2-3npmjOBLq53lBH7k3XW64z/sync_task'
 const AIRSCRIPT_TOKEN = process.env.AIRSCRIPT_TOKEN || '6fGqU99bv52z1X4GgGwyoV'
 const REQUEST_TIMEOUT_MS = 20_000
+const CACHE_TTL_MS = 60_000
+const responseCache = new Map()
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -86,11 +88,35 @@ function proxyCargo(body) {
 async function handleCargo(req, res) {
   try {
     const body = await readRequestBody(req)
+    const now = Date.now()
+    const cached = responseCache.get(body)
+
+    if (cached && cached.expiresAt > now) {
+      res.writeHead(cached.statusCode, {
+        'Content-Type': cached.contentType,
+        'Cache-Control': 'public, max-age=60, s-maxage=60',
+        'Access-Control-Allow-Origin': '*',
+        'X-Cargo-Cache': 'HIT',
+      })
+      res.end(cached.body)
+      return
+    }
+
     const upstream = await proxyCargo(body)
+    const entry = {
+      ...upstream,
+      expiresAt: now + CACHE_TTL_MS,
+    }
+
+    if (upstream.statusCode >= 200 && upstream.statusCode < 300) {
+      responseCache.set(body, entry)
+    }
+
     res.writeHead(upstream.statusCode, {
       'Content-Type': upstream.contentType,
-      'Cache-Control': 'no-store',
+      'Cache-Control': 'public, max-age=60, s-maxage=60',
       'Access-Control-Allow-Origin': '*',
+      'X-Cargo-Cache': 'MISS',
     })
     res.end(upstream.body)
   } catch (error) {
