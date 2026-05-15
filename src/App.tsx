@@ -733,81 +733,115 @@ function App() {
         </div>
       </section>
 
-      <section className="toolbar">
-        <label>
-          <span>{t.search}</span>
-          <div className="search-field">
-            <input
-              value={keyword}
-              onChange={(e) => {
-                setKeyword(e.target.value)
-                setCurrentPage(1)
-              }}
-              placeholder={t.searchPlaceholder}
-            />
-            {keyword && (
-              <button
-                type="button"
-                className="clear-search"
-                onClick={() => {
-                  setKeyword('')
-                  setCurrentPage(1)
-                }}
-                aria-label={t.clearSearch}
-                title={t.clearSearch}
-              >
-                ×
-              </button>
-            )}
+      <section className="toolbar dashboard-toolbar">
+        <div className="filter-dashboard-header">
+          <div>
+            <span className="dashboard-eyebrow">{language === 'zh' ? '筛选控制台' : 'Filter Console'}</span>
+            <strong>{language === 'zh' ? '当前视图' : 'Current View'}</strong>
           </div>
-        </label>
-        <label>
-          <span>{t.category}</span>
-          <div className="select-field">
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value)
-                setCurrentPage(1)
-              }}
-            >
-              {categories.map((name) => <option key={name} value={name}>{name}</option>)}
-            </select>
-            {category !== ALL_OPTION && (
-              <button
-                type="button"
-                className="clear-filter"
-                onClick={() => {
-                  setCategory(ALL_OPTION)
-                  setCurrentPage(1)
-                }}
-                aria-label={t.clearCategory}
-                title={t.clearCategory}
-              >
-                ×
-              </button>
-            )}
-          </div>
-        </label>
-        <div className="tag-filter-field">
-          <span>{t.pickTags}</span>
-          <div className="tag-filter-list">
-            {tagOptions.map((name) => (
-              <button
-                type="button"
-                className={`tag-filter-chip ${TAG_TONES[name] || 'all'}${tagFilter === name ? ' active' : ''}`}
-                key={name}
-                onClick={() => {
-                  setTagFilter((current) => (current === name && name !== ALL_OPTION ? ALL_OPTION : name))
-                  setCurrentPage(1)
-                }}
-              >
-                <span>{name === ALL_OPTION ? (language === 'zh' ? '全部' : 'All') : tagLabel(name, language)}</span>
-              </button>
-            ))}
+          <div className="filter-summary-cards">
+            <div>
+              <span>{language === 'zh' ? '筛选结果' : 'Results'}</span>
+              <strong>{sortedItems.length}</strong>
+            </div>
+            <div>
+              <span>{t.basket}</span>
+              <strong>{selectedItems.length}</strong>
+            </div>
+            <div>
+              <span>{language === 'zh' ? '排序' : 'Sort'}</span>
+              <strong>{SORT_LABELS[language][sortBy]} · {sortDirection === 'desc' ? t.desc : t.asc}</strong>
+            </div>
           </div>
         </div>
-        {isPending && <div className="sort-pending">{t.sorting}</div>}
+
+        <div className="active-filter-row">
+          <span>{language === 'zh' ? '当前条件' : 'Active filters'}</span>
+          <div className="active-filter-chips">
+            {keyword.trim() && <button type="button" onClick={() => setKeyword('')}>{language === 'zh' ? '搜索' : 'Search'}: {keyword.trim()} ×</button>}
+            {category !== ALL_OPTION && <button type="button" onClick={() => setCategory(ALL_OPTION)}>{t.category}: {category} ×</button>}
+            {tagFilter !== ALL_OPTION && <button type="button" onClick={() => setTagFilter(ALL_OPTION)}>{t.pickTags}: {tagLabel(tagFilter, language)} ×</button>}
+            {showSelectedOnly && <button type="button" onClick={() => setShowSelectedOnly(false)}>{t.selectedOnly} ×</button>}
+            {!keyword.trim() && category === ALL_OPTION && tagFilter === ALL_OPTION && !showSelectedOnly && <em>{language === 'zh' ? '全部货盘' : 'All cargo items'}</em>}
+          </div>
+        </div>
+
+        <div className="toolbar-controls">
+          <label>
+            <span>{t.search}</span>
+            <div className="search-field">
+              <input
+                value={keyword}
+                onChange={(e) => {
+                  setKeyword(e.target.value)
+                  setCurrentPage(1)
+                }}
+                placeholder={t.searchPlaceholder}
+              />
+              {keyword && (
+                <button
+                  type="button"
+                  className="clear-search"
+                  onClick={() => {
+                    setKeyword('')
+                    setCurrentPage(1)
+                  }}
+                  aria-label={t.clearSearch}
+                  title={t.clearSearch}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </label>
+          <label>
+            <span>{t.category}</span>
+            <div className="select-field">
+              <select
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value)
+                  setCurrentPage(1)
+                }}
+              >
+                {categories.map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
+              {category !== ALL_OPTION && (
+                <button
+                  type="button"
+                  className="clear-filter"
+                  onClick={() => {
+                    setCategory(ALL_OPTION)
+                    setCurrentPage(1)
+                  }}
+                  aria-label={t.clearCategory}
+                  title={t.clearCategory}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </label>
+          <div className="tag-filter-field">
+            <span>{t.pickTags}</span>
+            <div className="tag-filter-list">
+              {tagOptions.map((name) => (
+                <button
+                  type="button"
+                  className={`tag-filter-chip ${TAG_TONES[name] || 'all'}${tagFilter === name ? ' active' : ''}`}
+                  key={name}
+                  onClick={() => {
+                    setTagFilter((current) => (current === name && name !== ALL_OPTION ? ALL_OPTION : name))
+                    setCurrentPage(1)
+                  }}
+                >
+                  <span>{name === ALL_OPTION ? (language === 'zh' ? '全部' : 'All') : tagLabel(name, language)}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          {isPending && <div className="sort-pending">{t.sorting}</div>}
+        </div>
       </section>
 
       <section className="table-card">
