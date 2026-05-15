@@ -34,6 +34,7 @@ type PickTag = {
 
 type SortKey = 'sales30' | 'sales7' | 'daysOnline'
 type SortDirection = 'asc' | 'desc'
+type Language = 'zh' | 'en'
 
 const STORE_NAME = 'TTS-烛照'
 const DISPLAY_NAME = 'TTS-Chic NVF'
@@ -48,21 +49,32 @@ const MARKET_KEYS = [
   'PID-SA（沙特）',
 ]
 
-const MARKET_LABELS: Record<string, string> = {
-  'PID-US（美国）': 'US 美国',
-  'PID-GB（英国）': 'GB 英国',
-  'PID-DE（德国）': 'DE 德国',
-  'PID-FR（法国）': 'FR 法国',
-  'PID-ES（西班牙）': 'ES 西班牙',
-  'PID-IT（意大利）': 'IT 意大利',
-  'PID-MX（墨西哥）': 'MX 墨西哥',
-  'PID-SA（沙特）': 'SA 沙特',
+const MARKET_LABELS: Record<Language, Record<string, string>> = {
+  zh: {
+    'PID-US（美国）': 'US 美国',
+    'PID-GB（英国）': 'GB 英国',
+    'PID-DE（德国）': 'DE 德国',
+    'PID-FR（法国）': 'FR 法国',
+    'PID-ES（西班牙）': 'ES 西班牙',
+    'PID-IT（意大利）': 'IT 意大利',
+    'PID-MX（墨西哥）': 'MX 墨西哥',
+    'PID-SA（沙特）': 'SA 沙特',
+  },
+  en: {
+    'PID-US（美国）': 'US',
+    'PID-GB（英国）': 'GB',
+    'PID-DE（德国）': 'DE',
+    'PID-FR（法国）': 'FR',
+    'PID-ES（西班牙）': 'ES',
+    'PID-IT（意大利）': 'IT',
+    'PID-MX（墨西哥）': 'MX',
+    'PID-SA（沙特）': 'SA',
+  },
 }
 
-const SORT_LABELS: Record<SortKey, string> = {
-  sales30: '30天销量',
-  sales7: '7天销量',
-  daysOnline: '上架天数',
+const SORT_LABELS: Record<Language, Record<SortKey, string>> = {
+  zh: { sales30: '30天销量', sales7: '7天销量', daysOnline: '上架天数' },
+  en: { sales30: '30-Day Sales', sales7: '7-Day Sales', daysOnline: 'Days Online' },
 }
 const PAGE_SIZE = 50
 const MIN_GOOD_PID_COUNT = 3
@@ -73,17 +85,36 @@ const TAG_TONES: Record<string, PickTag['tone']> = {
   多站点: 'coverage',
   待观察: 'watch',
 }
-const TAG_DESCRIPTIONS: Record<string, string> = {
-  爆款: '近7天销量较高，或近期销量动能明显',
-  稳定出单: '近30天销量稳定，且近7天仍有销量',
-  潜力新品: '上架30天内，且近7天已有销量',
-  多站点: `有效 PID 覆盖不少于 ${MIN_GOOD_PID_COUNT} 个站点`,
-  待观察: '暂未出现明显销量、上新或多站点覆盖信号',
+const TAG_LABELS: Record<string, Record<Language, string>> = {
+  爆款: { zh: '爆款', en: 'Hot Seller' },
+  稳定出单: { zh: '稳定出单', en: 'Stable Sales' },
+  潜力新品: { zh: '潜力新品', en: 'New Potential' },
+  多站点: { zh: '多站点', en: 'Multi-Market' },
+  待观察: { zh: '待观察', en: 'Watch' },
+}
+const TAG_DESCRIPTIONS: Record<string, Record<Language, string>> = {
+  爆款: { zh: '近7天销量较高，或近期销量动能明显', en: 'High 7-day sales or clear recent sales momentum' },
+  稳定出单: { zh: '近30天销量稳定，且近7天仍有销量', en: 'Stable 30-day sales with recent 7-day orders' },
+  潜力新品: { zh: '上架30天内，且近7天已有销量', en: 'Listed within 30 days and sold in the last 7 days' },
+  多站点: { zh: `有效 PID 覆盖不少于 ${MIN_GOOD_PID_COUNT} 个站点`, en: `Valid PIDs cover at least ${MIN_GOOD_PID_COUNT} markets` },
+  待观察: { zh: '暂未出现明显销量、上新或多站点覆盖信号', en: 'No clear sales, new-arrival, or multi-market signal yet' },
 }
 const TAG_ORDER = ['爆款', '稳定出单', '潜力新品', '多站点', '待观察']
+const ALL_OPTION = '全部'
 const BASKET_STORAGE_KEY = 'cargo-board:selected-items'
 const GUIDE_COLLAPSED_STORAGE_KEY = 'cargo-board:guide-collapsed'
 const RULES_COLLAPSED_STORAGE_KEY = 'cargo-board:rules-collapsed'
+const LANGUAGE_STORAGE_KEY = 'cargo-board:language'
+
+
+const TEXT = {
+  zh: {
+    lang: 'English', title: '货盘', subtitle: '实时读取金山 AirScript 接口，支持搜索、类目筛选、标签选品、销量排序，并可导出当前筛选结果。', refresh: '刷新数据', refreshing: '刷新中…', exportCurrent: '导出当前结果', exportTitle: '导出当前搜索、筛选和排序后的结果', spuCount: 'SPU 数', skcCount: 'SKC 数量', validPid: '有效 PID', updatedAt: '数据更新时间', loading: '加载中', guideTitle: '机构选品建议', guideStrong: '优先带货参考', guideTips: ['优先看「爆款」「稳定出单」「潜力新品」', '点击 SPU 查看同款所有 SKC', '点击图片预览大图，点击 PID 快速复制', '推荐标签按销量、上架天数和 PID 覆盖自动计算', '加入「选品篮」后可统一导出或复制推广信息'], expand: '展开', collapse: '收起', ruleTitle: '推荐标签规则', ruleStrong: '自动计算，仅供选品参考', basket: '选品篮', selectedPrefix: '已选 ', selectedSuffix: ' 款', viewAll: '查看全部', selectedOnly: '只看已选', exportSelected: '导出已选', copied: '已复制', copySelected: '复制已选话术', clear: '清空', search: '搜索', searchPlaceholder: 'SPU / SKC / 款号 / 颜色', clearSearch: '清空搜索', category: '类目', clearCategory: '清空类目筛选', pickTags: '推荐标签', sorting: '排序处理中…', meta: (total: number, filtered: number, start: number, end: number) => `共 ${total} 条数据，筛选后 ${filtered} 条，当前展示 ${start}-${end} 条；导出会包含当前筛选结果`, prev: '上一页', next: '下一页', image: '图片', styleNo: '款号', color: '颜色', daysOnline: '上架天数', oneCopy: '一键复制', marketPids: '各站 PID', loadingData: '正在加载货盘数据…', noMatch: '没有匹配的数据', previewLabel: '商品图片预览', productImage: '商品图片', closePreview: '关闭预览', openOriginal: '打开原图', imageBroken: '图片失效', noImage: '无图', addBasket: '加入选品篮', removeBasket: '移出选品篮', selected: '已选', add: '加入', preview: '预览大图', cancelSpu: '取消筛选 SPU：', filterSpu: '点击筛选该 SPU 下所有 SKC：', cancelFilter: '取消筛选', filter: '筛选', day: '天', sales7: '7天销量', sales30: '30天销量', copyPid: '点击复制 ', noPid: '暂无 PID', requestFailed: '接口请求失败：', loadFailed: '加载失败', clipboardError: '复制失败：浏览器没有开放剪贴板权限', desc: '倒序', asc: '正序', sortPrefix: '按', sortSuffix: '排序', pitchTitle: '货盘推荐', store: '店铺', imageLink: '图片链接', operator: '运营', fileSuffix: '货盘'
+  },
+  en: {
+    lang: '中文', title: 'Cargo Board', subtitle: 'Reads the Kingsoft AirScript API in real time, with search, category filters, pick tags, sales sorting, and export for current results.', refresh: 'Refresh Data', refreshing: 'Refreshing…', exportCurrent: 'Export Current', exportTitle: 'Export current searched, filtered, and sorted results', spuCount: 'SPUs', skcCount: 'SKCs', validPid: 'Valid PIDs', updatedAt: 'Updated', loading: 'Loading', guideTitle: 'Agency Picking Guide', guideStrong: 'Priority references', guideTips: ['Prioritize Hot Seller, Stable Sales, and New Potential items', 'Click SPU to view all SKCs of the same style', 'Click image to preview; click PID to copy quickly', 'Pick tags are calculated from sales, days online, and PID coverage', 'Add items to Basket to export or copy pitches together'], expand: 'Expand', collapse: 'Collapse', ruleTitle: 'Pick Tag Rules', ruleStrong: 'Auto-calculated, for picking reference only', basket: 'Basket', selectedPrefix: 'Selected ', selectedSuffix: ' items', viewAll: 'View All', selectedOnly: 'Selected Only', exportSelected: 'Export Selected', copied: 'Copied', copySelected: 'Copy Selected Pitch', clear: 'Clear', search: 'Search', searchPlaceholder: 'SPU / SKC / Style No. / Color', clearSearch: 'Clear search', category: 'Category', clearCategory: 'Clear category filter', pickTags: 'Pick Tags', sorting: 'Sorting…', meta: (total: number, filtered: number, start: number, end: number) => `${total} records, ${filtered} after filtering, showing ${start}-${end}; export includes current filtered results`, prev: 'Prev', next: 'Next', image: 'Image', styleNo: 'Style No.', color: 'Color', daysOnline: 'Days Online', oneCopy: 'Copy Pitch', marketPids: 'Market PIDs', loadingData: 'Loading cargo data…', noMatch: 'No matching data', previewLabel: 'Product image preview', productImage: 'Product image', closePreview: 'Close preview', openOriginal: 'Open original', imageBroken: 'Image unavailable', noImage: 'No image', addBasket: 'Add to basket', removeBasket: 'Remove from basket', selected: 'Selected', add: 'Add', preview: 'Preview image', cancelSpu: 'Clear SPU filter: ', filterSpu: 'Filter all SKCs under SPU: ', cancelFilter: 'Clear', filter: 'Filter', day: 'd', sales7: '7-Day Sales', sales30: '30-Day Sales', copyPid: 'Copy ', noPid: 'No PID', requestFailed: 'API request failed: ', loadFailed: 'Load failed', clipboardError: 'Copy failed: clipboard permission is not available in this browser', desc: 'Desc', asc: 'Asc', sortPrefix: 'Sort by ', sortSuffix: '', pitchTitle: 'Cargo Recommendation', store: 'Store', imageLink: 'Image URL', operator: 'Operator', fileSuffix: 'cargo-board'
+  },
+} as const
 
 function readSavedBoolean(key: string, fallback = false) {
   try {
@@ -91,6 +122,14 @@ function readSavedBoolean(key: string, fallback = false) {
     return raw == null ? fallback : raw === 'true'
   } catch {
     return fallback
+  }
+}
+
+function readSavedLanguage(): Language {
+  try {
+    return window.localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'en' ? 'en' : 'zh'
+  } catch {
+    return 'zh'
   }
 }
 
@@ -188,30 +227,40 @@ function normalizeRecord(record: RawRecord): CargoItem {
   }
 }
 
-function buildPitchText(item: CargoItem) {
+function tagLabel(label: string, language: Language) {
+  return TAG_LABELS[label]?.[language] || label
+}
+
+function tagDescription(label: string, language: Language) {
+  return TAG_DESCRIPTIONS[label]?.[language] || TAG_DESCRIPTIONS[label]?.zh || ''
+}
+
+function buildPitchText(item: CargoItem, language: Language) {
+  const t = TEXT[language]
   const activePids = MARKET_KEYS
-    .map((key) => ({ market: MARKET_LABELS[key], pid: item.pids[key] }))
+    .map((key) => ({ market: MARKET_LABELS[language][key], pid: item.pids[key] }))
     .filter(({ pid }) => pid && pid !== '-')
-    .map(({ market, pid }) => `${market}：${pid}`)
+    .map(({ market, pid }) => `${market}: ${pid}`)
 
   return [
-    `【${DISPLAY_NAME} 货盘推荐】`,
-    `SPU：${item.spu || '-'}`,
-    `SKC：${item.skcId || '-'}`,
-    `款号：${item.styleNo || '-'}`,
-    `颜色：${item.color || '-'}`,
-    `类目：${item.leafCategory || item.category || '-'}`,
-    `选品标签：${item.pickTags.map((tag) => tag.label).join(' / ')}`,
-    `上架天数：${item.daysOnline ? `${item.daysOnline}天` : '-'}`,
-    `近7天销量：${item.sales7}`,
-    `近30天销量：${item.sales30}`,
-    activePids.length ? `各站 PID：\n${activePids.join('\n')}` : '各站 PID：暂无',
-    item.imageLink ? `图片：${item.imageLink}` : '',
+    `【${DISPLAY_NAME} ${t.pitchTitle}】`,
+    `SPU: ${item.spu || '-'}`,
+    `SKC: ${item.skcId || '-'}`,
+    `${t.styleNo}: ${item.styleNo || '-'}`,
+    `${t.color}: ${item.color || '-'}`,
+    `${t.category}: ${item.leafCategory || item.category || '-'}`,
+    `${t.pickTags}: ${item.pickTags.map((tag) => tagLabel(tag.label, language)).join(' / ')}`,
+    `${t.daysOnline}: ${item.daysOnline ? `${item.daysOnline}${t.day}` : '-'}`,
+    `${t.sales7}: ${item.sales7}`,
+    `${t.sales30}: ${item.sales30}`,
+    activePids.length ? `${t.marketPids}:\n${activePids.join('\n')}` : `${t.marketPids}: ${t.noPid}`,
+    item.imageLink ? `${t.image}: ${item.imageLink}` : '',
   ].filter(Boolean).join('\n')
 }
 
-function exportCsv(items: CargoItem[]) {
-  const headers = ['店铺', '图片链接', 'SPU', 'SKC ID', '款号', '颜色', '类目', '选品标签', '运营', '上架天数', '近7天销量', '近30天销量', ...MARKET_KEYS]
+function exportCsv(items: CargoItem[], language: Language) {
+  const t = TEXT[language]
+  const headers = [t.store, t.imageLink, 'SPU', 'SKC ID', t.styleNo, t.color, t.category, t.pickTags, t.operator, t.daysOnline, t.sales7, t.sales30, ...MARKET_KEYS.map((key) => MARKET_LABELS[language][key])]
   const rows = items.map((item) => [
     item.store,
     item.imageLink,
@@ -220,7 +269,7 @@ function exportCsv(items: CargoItem[]) {
     item.styleNo,
     item.color,
     item.category,
-    item.pickTags.map((tag) => tag.label).join(' / '),
+    item.pickTags.map((tag) => tagLabel(tag.label, language)).join(' / '),
     item.operator,
     item.daysOnline,
     item.sales7,
@@ -234,7 +283,7 @@ function exportCsv(items: CargoItem[]) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${DISPLAY_NAME}-货盘.csv`
+  a.download = `${DISPLAY_NAME}-${t.fileSuffix}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -244,6 +293,8 @@ type CargoRowProps = {
   copiedPid: string
   isSelected: boolean
   isSpuFiltered: boolean
+  language: Language
+  text: (typeof TEXT)[Language]
   onCopyPitch: (item: CargoItem) => void
   onCopyPid: (pid: string) => void
   onPreviewImage: (item: CargoItem) => void
@@ -254,14 +305,15 @@ type CargoRowProps = {
 type ImageThumbProps = {
   src: string
   alt: string
+  fallback: string
 }
 
-const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
+const ImageThumb = memo(function ImageThumb({ src, alt, fallback }: ImageThumbProps) {
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
 
   if (failed) {
-    return <span className="image-fallback">图片失效</span>
+    return <span className="image-fallback">{fallback}</span>
   }
 
   return (
@@ -280,25 +332,25 @@ const ImageThumb = memo(function ImageThumb({ src, alt }: ImageThumbProps) {
   )
 })
 
-const CargoRow = memo(function CargoRow({ item, copiedPid, isSelected, isSpuFiltered, onCopyPitch, onCopyPid, onPreviewImage, onSearchSpu, onToggleSelection }: CargoRowProps) {
+const CargoRow = memo(function CargoRow({ item, copiedPid, isSelected, isSpuFiltered, language, text: t, onCopyPitch, onCopyPid, onPreviewImage, onSearchSpu, onToggleSelection }: CargoRowProps) {
   return (
     <tr className={isSelected ? 'selected-row' : ''}>
-      <td className="basket-cell" data-label="选品篮">
+      <td className="basket-cell" data-label={t.basket}>
         <button
           className={`basket-toggle${isSelected ? ' active' : ''}`}
           type="button"
           onClick={() => onToggleSelection(item.id)}
-          title={isSelected ? '移出选品篮' : '加入选品篮'}
+          title={isSelected ? t.removeBasket : t.addBasket}
         >
-          {isSelected ? '已选' : '加入'}
+          {isSelected ? t.selected : t.add}
         </button>
       </td>
-      <td className="image-cell" data-label="图片">
+      <td className="image-cell" data-label={t.image}>
         {item.imageLink ? (
-          <button className="image-preview-trigger" type="button" onClick={() => onPreviewImage(item)} title="预览大图">
-            <ImageThumb key={item.imageLink} src={item.imageLink} alt={item.styleNo || item.spu || '商品图片'} />
+          <button className="image-preview-trigger" type="button" onClick={() => onPreviewImage(item)} title={t.preview}>
+            <ImageThumb key={item.imageLink} src={item.imageLink} alt={item.styleNo || item.spu || t.productImage} fallback={t.imageBroken} />
           </button>
-        ) : <span className="no-image">无图</span>}
+        ) : <span className="no-image">{t.noImage}</span>}
       </td>
       <td data-label="SPU / SKC">
         {item.spu ? (
@@ -306,29 +358,29 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, isSelected, isSpuFilt
             className={`spu-link${isSpuFiltered ? ' active' : ''}`}
             type="button"
             onClick={() => onSearchSpu(item.spu)}
-            title={isSpuFiltered ? `取消筛选 SPU：${item.spu}` : `点击筛选该 SPU 下所有 SKC：${item.spu}`}
+            title={isSpuFiltered ? `${t.cancelSpu}${item.spu}` : `${t.filterSpu}${item.spu}`}
           >
             <span>{item.spu}</span>
-            <em>{isSpuFiltered ? '取消筛选' : '筛选'}</em>
+            <em>{isSpuFiltered ? t.cancelFilter : t.filter}</em>
           </button>
         ) : <strong>-</strong>}
         <small>{item.skcId || '-'}</small>
       </td>
-      <td data-label="款号">{item.styleNo || '-'}</td>
-      <td data-label="颜色">{item.color || '-'}</td>
-      <td className="category" data-label="类目" title={item.category}>{item.leafCategory || '-'}</td>
-      <td className="pick-tags" data-label="推荐标签">
-        {item.pickTags.map((tag) => <span className={`pick-tag ${tag.tone}`} key={tag.label} title={TAG_DESCRIPTIONS[tag.label]}>{tag.label}</span>)}
+      <td data-label={t.styleNo}>{item.styleNo || '-'}</td>
+      <td data-label={t.color}>{item.color || '-'}</td>
+      <td className="category" data-label={t.category} title={item.category}>{item.leafCategory || '-'}</td>
+      <td className="pick-tags" data-label={t.pickTags}>
+        {item.pickTags.map((tag) => <span className={`pick-tag ${tag.tone}`} key={tag.label} title={tagDescription(tag.label, language)}>{tagLabel(tag.label, language)}</span>)}
       </td>
-      <td data-label="上架天数">{item.daysOnline ? `${item.daysOnline}天` : '-'}</td>
-      <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label="7天销量">{item.sales7}</td>
-      <td className={item.sales30 > 0 ? 'sales hot' : 'sales'} data-label="30天销量">{item.sales30}</td>
-      <td className="pitch-cell" data-label="一键复制">
+      <td data-label={t.daysOnline}>{item.daysOnline ? `${item.daysOnline}${t.day}` : '-'}</td>
+      <td className={item.sales7 > 0 ? 'sales hot' : 'sales'} data-label={t.sales7}>{item.sales7}</td>
+      <td className={item.sales30 > 0 ? 'sales hot' : 'sales'} data-label={t.sales30}>{item.sales30}</td>
+      <td className="pitch-cell" data-label={t.oneCopy}>
         <button className={`pitch-copy${copiedPid === `pitch:${item.id}` ? ' copied' : ''}`} type="button" onClick={() => onCopyPitch(item)}>
-          {copiedPid === `pitch:${item.id}` ? '已复制' : '一键复制'}
+          {copiedPid === `pitch:${item.id}` ? t.copied : t.oneCopy}
         </button>
       </td>
-      <td className="pid-list" data-label="各站 PID">
+      <td className="pid-list" data-label={t.marketPids}>
         {MARKET_KEYS.map((key) => {
           const pid = item.pids[key]
           const canCopy = Boolean(pid && pid !== '-')
@@ -338,11 +390,11 @@ const CargoRow = memo(function CargoRow({ item, copiedPid, isSelected, isSpuFilt
               disabled={!canCopy}
               key={key}
               onClick={() => onCopyPid(pid)}
-              title={canCopy ? `点击复制 ${pid}` : '暂无 PID'}
+              title={canCopy ? `${t.copyPid}${pid}` : t.noPid}
               type="button"
             >
-              {MARKET_LABELS[key]}：{pid}
-              {copiedPid === pid && <em>已复制</em>}
+              {MARKET_LABELS[language][key]}: {pid}
+              {copiedPid === pid && <em>{t.copied}</em>}
             </button>
           )
         })}
@@ -368,7 +420,9 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(readSavedSelectedIds)
   const [previewItem, setPreviewItem] = useState<CargoItem | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [language, setLanguage] = useState<Language>(readSavedLanguage)
   const [isPending, startTransition] = useTransition()
+  const t = TEXT[language]
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -379,11 +433,11 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ Context: { argv: { store_name: STORE_NAME } } }),
       })
-      if (!response.ok) throw new Error(`接口请求失败：${response.status}`)
+      if (!response.ok) throw new Error(`${t.requestFailed}${response.status}`)
       const payload = await response.json()
       const list = (payload?.data?.result || []) as RawRecord[]
       setItems(list.map(normalizeRecord))
-      setUpdatedAt(new Intl.DateTimeFormat('zh-CN', {
+      setUpdatedAt(new Intl.DateTimeFormat(language === 'zh' ? 'zh-CN' : 'en-US', {
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
@@ -391,11 +445,11 @@ function App() {
         hour12: false,
       }).format(new Date()))
     } catch (err) {
-      setError(err instanceof Error ? err.message : '加载失败')
+      setError(err instanceof Error ? err.message : t.loadFailed)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [language, t.loadFailed, t.requestFailed])
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -415,6 +469,10 @@ function App() {
     window.localStorage.setItem(RULES_COLLAPSED_STORAGE_KEY, String(rulesCollapsed))
   }, [rulesCollapsed])
 
+  useEffect(() => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+  }, [language])
+
   const validSelectedIds = useMemo(() => {
     if (!items.length) return selectedIds
 
@@ -424,8 +482,8 @@ function App() {
 
   const categories = useMemo(() => {
     const set = new Set(items.map((item) => item.leafCategory).filter(Boolean))
-    return ['全部', ...Array.from(set).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))]
-  }, [items])
+    return [ALL_OPTION, ...Array.from(set).sort((a, b) => a.localeCompare(b, language === 'zh' ? 'zh-Hans-CN' : 'en-US'))]
+  }, [items, language])
 
   const tagOptions = useMemo(() => {
     const set = new Set<string>()
@@ -434,15 +492,15 @@ function App() {
     })
     const extraTags = Array.from(set)
       .filter((tag) => !TAG_ORDER.includes(tag))
-      .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
-    return ['全部', ...TAG_ORDER, ...extraTags]
-  }, [items])
+      .sort((a, b) => tagLabel(a, language).localeCompare(tagLabel(b, language), language === 'zh' ? 'zh-Hans-CN' : 'en-US'))
+    return [ALL_OPTION, ...TAG_ORDER, ...extraTags]
+  }, [items, language])
 
   const filteredItems = useMemo(() => {
     const key = keyword.trim().toLowerCase()
     return items.filter((item) => {
-      const inCategory = category === '全部' || item.leafCategory === category
-      const inTag = tagFilter === '全部' || item.pickTags.some((tag) => tag.label === tagFilter)
+      const inCategory = category === ALL_OPTION || item.leafCategory === category
+      const inTag = tagFilter === ALL_OPTION || item.pickTags.some((tag) => tag.label === tagFilter)
       const inBasket = !showSelectedOnly || validSelectedIds.has(item.id)
       return inCategory && inTag && inBasket && (!key || item.searchable.includes(key))
     })
@@ -502,23 +560,23 @@ function App() {
     if (!selectedItems.length) return
 
     try {
-      await navigator.clipboard.writeText(selectedItems.map(buildPitchText).join('\n\n---\n\n'))
+      await navigator.clipboard.writeText(selectedItems.map((item) => buildPitchText(item, language)).join('\n\n---\n\n'))
       setCopiedPid('selected:pitch')
       window.setTimeout(() => setCopiedPid((current) => (current === 'selected:pitch' ? '' : current)), 1200)
     } catch {
-      setError('复制失败：浏览器没有开放剪贴板权限')
+      setError(t.clipboardError)
     }
-  }, [selectedItems])
+  }, [language, selectedItems, t.clipboardError])
 
   const handleCopyPitch = useCallback(async (item: CargoItem) => {
     try {
-      await navigator.clipboard.writeText(buildPitchText(item))
+      await navigator.clipboard.writeText(buildPitchText(item, language))
       setCopiedPid(`pitch:${item.id}`)
       window.setTimeout(() => setCopiedPid((current) => (current === `pitch:${item.id}` ? '' : current)), 1200)
     } catch {
-      setError('复制失败：浏览器没有开放剪贴板权限')
+      setError(t.clipboardError)
     }
-  }, [])
+  }, [language, t.clipboardError])
 
   const handleCopyPid = useCallback(async (pid: string) => {
     if (!pid || pid === '-') return
@@ -528,9 +586,9 @@ function App() {
       setCopiedPid(pid)
       window.setTimeout(() => setCopiedPid((current) => (current === pid ? '' : current)), 1200)
     } catch {
-      setError('复制失败：浏览器没有开放剪贴板权限')
+      setError(t.clipboardError)
     }
-  }, [])
+  }, [t.clipboardError])
 
   function handleSortChange(value: SortKey) {
     startTransition(() => {
@@ -560,16 +618,16 @@ function App() {
   function renderSortableHeader(value: SortKey) {
     const active = sortBy === value
     const nextDirection = active && sortDirection === 'desc' ? 'asc' : 'desc'
-    const directionLabel = sortDirection === 'desc' ? '倒序' : '正序'
+    const directionLabel = sortDirection === 'desc' ? t.desc : t.asc
     return (
       <button
         type="button"
         className={`sort-header${active ? ' active' : ''}`}
         onClick={() => handleSortChange(value)}
         aria-sort={active ? (sortDirection === 'desc' ? 'descending' : 'ascending') : 'none'}
-        title={`按${SORT_LABELS[value]}${nextDirection === 'desc' ? '倒序' : '正序'}排序`}
+        title={`${t.sortPrefix}${SORT_LABELS[language][value]}${nextDirection === 'desc' ? t.desc : t.asc}${t.sortSuffix}`}
       >
-        {SORT_LABELS[value]}
+        {SORT_LABELS[language][value]}
         <span aria-hidden="true">{active ? (sortDirection === 'desc' ? '↓' : '↑') : '↕'}</span>
         {active && <em>{directionLabel}</em>}
       </button>
@@ -579,69 +637,72 @@ function App() {
   return (
     <main className="page">
       <header className="hero-card">
-        <div>
-          <p className="eyebrow">Cargo Board</p>
-          <h1>{DISPLAY_NAME} 货盘</h1>
-          <p className="sub-title">实时读取金山 AirScript 接口，支持搜索、类目筛选、标签选品、销量排序，并可导出当前筛选结果。</p>
+        <div className="hero-copy">
+          <div className="hero-kicker">
+            <p className="eyebrow">Cargo Board</p>
+            <button type="button" className="language-toggle" onClick={() => setLanguage((current) => (current === 'zh' ? 'en' : 'zh'))} aria-label="Switch language">
+              <span className={language === 'zh' ? 'active' : ''}>中</span>
+              <i aria-hidden="true" />
+              <span className={language === 'en' ? 'active' : ''}>EN</span>
+            </button>
+          </div>
+          <h1>{DISPLAY_NAME} {t.title}</h1>
+          <p className="sub-title">{t.subtitle}</p>
         </div>
         <div className="actions">
-          <button type="button" onClick={loadData} disabled={loading}>{loading ? '刷新中…' : '刷新数据'}</button>
-          <button type="button" className="secondary" onClick={() => exportCsv(sortedItems)} disabled={!sortedItems.length} title="导出当前搜索、筛选和排序后的结果">导出当前结果</button>
+          <button type="button" onClick={loadData} disabled={loading}>{loading ? t.refreshing : t.refresh}</button>
+          <button type="button" className="secondary" onClick={() => exportCsv(sortedItems, language)} disabled={!sortedItems.length} title={t.exportTitle}>{t.exportCurrent}</button>
         </div>
       </header>
 
       {error && <div className="error">{error}</div>}
 
       <section className="stats-grid">
-        <div><span>SPU 数</span><strong>{stats.spuCount}</strong></div>
-        <div><span>SKC 数量</span><strong>{stats.skcCount}</strong></div>
-        <div><span>有效 PID</span><strong>{stats.pidCount}</strong></div>
-        <div><span>数据更新时间</span><strong className="updated-at">{updatedAt || '加载中'}</strong></div>
+        <div><span>{t.spuCount}</span><strong>{stats.spuCount}</strong></div>
+        <div><span>{t.skcCount}</span><strong>{stats.skcCount}</strong></div>
+        <div><span>{t.validPid}</span><strong>{stats.pidCount}</strong></div>
+        <div><span>{t.updatedAt}</span><strong className="updated-at">{updatedAt || t.loading}</strong></div>
       </section>
 
       <section className={`agency-guide${guideCollapsed ? ' collapsed' : ''}`}>
         <div className="agency-guide-title">
-          <span>机构选品建议</span>
-          <strong>优先带货参考</strong>
+          <span>{t.guideTitle}</span>
+          <strong>{t.guideStrong}</strong>
         </div>
         {!guideCollapsed && (
           <div className="agency-guide-tips">
-            <span>优先看「爆款」「稳定出单」「潜力新品」</span>
-            <span>点击 SPU 查看同款所有 SKC</span>
-            <span>点击图片预览大图，点击 PID 快速复制</span>
-            <span>推荐标签按销量、上架天数和 PID 覆盖自动计算</span>
-            <span>加入「选品篮」后可统一导出或复制推广信息</span>
+            {t.guideTips.map((tip) => <span key={tip}>{tip}</span>)}
           </div>
         )}
         <button className="section-toggle" type="button" onClick={() => setGuideCollapsed((current) => !current)}>
-          {guideCollapsed ? '展开' : '收起'}
+          {guideCollapsed ? t.expand : t.collapse}
         </button>
       </section>
 
       <section className={`tag-rule-panel${rulesCollapsed ? ' collapsed' : ''}`}>
         <div>
-          <span>推荐标签规则</span>
-          <strong>自动计算，仅供选品参考</strong>
+          <span>{t.ruleTitle}</span>
+          <strong>{t.ruleStrong}</strong>
         </div>
         {!rulesCollapsed && (
           <ul>
             {TAG_ORDER.map((name) => (
               <li key={name}>
-                <span className={`pick-tag ${TAG_TONES[name]}`}>{name}</span>
-                <em>{TAG_DESCRIPTIONS[name]}</em>
+                <span className={`pick-tag ${TAG_TONES[name]}`}>{tagLabel(name, language)}</span>
+                <em>{tagDescription(name, language)}</em>
               </li>
             ))}
           </ul>
         )}
         <button className="section-toggle" type="button" onClick={() => setRulesCollapsed((current) => !current)}>
-          {rulesCollapsed ? '展开' : '收起'}
+          {rulesCollapsed ? t.expand : t.collapse}
         </button>
       </section>
 
       <section className="basket-bar">
         <div>
-          <span>选品篮</span>
-          <strong>已选 {selectedItems.length} 款</strong>
+          <span>{t.basket}</span>
+          <strong>{t.selectedPrefix}{selectedItems.length}{t.selectedSuffix}</strong>
         </div>
         <div className="basket-actions">
           <button
@@ -653,10 +714,10 @@ function App() {
               setCurrentPage(1)
             }}
           >
-            {showSelectedOnly ? '查看全部' : '只看已选'}
+            {showSelectedOnly ? t.viewAll : t.selectedOnly}
           </button>
-          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems)}>导出已选</button>
-          <button type="button" disabled={!selectedItems.length} onClick={handleCopySelectedPitch}>{copiedPid === 'selected:pitch' ? '已复制' : '复制已选话术'}</button>
+          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems, language)}>{t.exportSelected}</button>
+          <button type="button" disabled={!selectedItems.length} onClick={handleCopySelectedPitch}>{copiedPid === 'selected:pitch' ? t.copied : t.copySelected}</button>
           <button
             type="button"
             className="basket-clear"
@@ -667,14 +728,14 @@ function App() {
               setCurrentPage(1)
             }}
           >
-            清空
+            {t.clear}
           </button>
         </div>
       </section>
 
       <section className="toolbar">
         <label>
-          <span>搜索</span>
+          <span>{t.search}</span>
           <div className="search-field">
             <input
               value={keyword}
@@ -682,7 +743,7 @@ function App() {
                 setKeyword(e.target.value)
                 setCurrentPage(1)
               }}
-              placeholder="SPU / SKC / 款号 / 颜色"
+              placeholder={t.searchPlaceholder}
             />
             {keyword && (
               <button
@@ -692,8 +753,8 @@ function App() {
                   setKeyword('')
                   setCurrentPage(1)
                 }}
-                aria-label="清空搜索"
-                title="清空搜索"
+                aria-label={t.clearSearch}
+                title={t.clearSearch}
               >
                 ×
               </button>
@@ -701,7 +762,7 @@ function App() {
           </div>
         </label>
         <label>
-          <span>类目</span>
+          <span>{t.category}</span>
           <div className="select-field">
             <select
               value={category}
@@ -712,16 +773,16 @@ function App() {
             >
               {categories.map((name) => <option key={name} value={name}>{name}</option>)}
             </select>
-            {category !== '全部' && (
+            {category !== ALL_OPTION && (
               <button
                 type="button"
                 className="clear-filter"
                 onClick={() => {
-                  setCategory('全部')
+                  setCategory(ALL_OPTION)
                   setCurrentPage(1)
                 }}
-                aria-label="清空类目筛选"
-                title="清空类目筛选"
+                aria-label={t.clearCategory}
+                title={t.clearCategory}
               >
                 ×
               </button>
@@ -729,7 +790,7 @@ function App() {
           </div>
         </label>
         <div className="tag-filter-field">
-          <span>推荐标签</span>
+          <span>{t.pickTags}</span>
           <div className="tag-filter-list">
             {tagOptions.map((name) => (
               <button
@@ -737,53 +798,53 @@ function App() {
                 className={`tag-filter-chip ${TAG_TONES[name] || 'all'}${tagFilter === name ? ' active' : ''}`}
                 key={name}
                 onClick={() => {
-                  setTagFilter((current) => (current === name && name !== '全部' ? '全部' : name))
+                  setTagFilter((current) => (current === name && name !== ALL_OPTION ? ALL_OPTION : name))
                   setCurrentPage(1)
                 }}
               >
-                <span>{name}</span>
+                <span>{name === ALL_OPTION ? (language === 'zh' ? '全部' : 'All') : tagLabel(name, language)}</span>
               </button>
             ))}
           </div>
         </div>
-        {isPending && <div className="sort-pending">排序处理中…</div>}
+        {isPending && <div className="sort-pending">{t.sorting}</div>}
       </section>
 
       <section className="table-card">
         <div className="table-meta">
-          <span>共 {items.length} 条数据，筛选后 {sortedItems.length} 条，当前展示 {sortedItems.length ? pageStart + 1 : 0}-{pageEnd} 条；导出会包含当前筛选结果</span>
+          <span>{t.meta(items.length, sortedItems.length, sortedItems.length ? pageStart + 1 : 0, pageEnd)}</span>
           <div className="pagination">
-            <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage - 1)} disabled={safeCurrentPage <= 1}>上一页</button>
+            <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage - 1)} disabled={safeCurrentPage <= 1}>{t.prev}</button>
             <strong>{safeCurrentPage} / {totalPages}</strong>
-            <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage + 1)} disabled={safeCurrentPage >= totalPages}>下一页</button>
+            <button type="button" className="secondary" onClick={() => handlePageChange(safeCurrentPage + 1)} disabled={safeCurrentPage >= totalPages}>{t.next}</button>
           </div>
         </div>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>选品篮</th>
-                <th>图片</th>
+                <th>{t.basket}</th>
+                <th>{t.image}</th>
                 <th>SPU / SKC</th>
-                <th>款号</th>
-                <th>颜色</th>
-                <th>类目</th>
-                <th>推荐标签</th>
+                <th>{t.styleNo}</th>
+                <th>{t.color}</th>
+                <th>{t.category}</th>
+                <th>{t.pickTags}</th>
                 <th>{renderSortableHeader('daysOnline')}</th>
                 <th>{renderSortableHeader('sales7')}</th>
                 <th>{renderSortableHeader('sales30')}</th>
-                <th>一键复制</th>
-                <th>各站 PID</th>
+                <th>{t.oneCopy}</th>
+                <th>{t.marketPids}</th>
               </tr>
             </thead>
             <tbody>
               {loading && !items.length ? (
-                <tr><td colSpan={12} className="empty">正在加载货盘数据…</td></tr>
+                <tr><td colSpan={12} className="empty">{t.loadingData}</td></tr>
               ) : pageItems.length ? pageItems.map((item) => {
                 const rowCopiedPid = Object.values(item.pids).includes(copiedPid) ? copiedPid : ''
-                return <CargoRow copiedPid={rowCopiedPid || (copiedPid === `pitch:${item.id}` ? copiedPid : '')} isSelected={validSelectedIds.has(item.id)} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} onCopyPitch={handleCopyPitch} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} onToggleSelection={handleToggleSelection} />
+                return <CargoRow copiedPid={rowCopiedPid || (copiedPid === `pitch:${item.id}` ? copiedPid : '')} isSelected={validSelectedIds.has(item.id)} isSpuFiltered={keyword.trim() === item.spu} item={item} key={item.id} language={language} text={t} onCopyPitch={handleCopyPitch} onCopyPid={handleCopyPid} onPreviewImage={setPreviewItem} onSearchSpu={handleSearchSpu} onToggleSelection={handleToggleSelection} />
               }) : (
-                <tr><td colSpan={12} className="empty">没有匹配的数据</td></tr>
+                <tr><td colSpan={12} className="empty">{t.noMatch}</td></tr>
               )}
             </tbody>
           </table>
@@ -791,20 +852,20 @@ function App() {
       </section>
 
       {previewItem && (
-        <div className="image-modal" role="dialog" aria-modal="true" aria-label="商品图片预览" onClick={closeImagePreview}>
+        <div className="image-modal" role="dialog" aria-modal="true" aria-label={t.previewLabel} onClick={closeImagePreview}>
           <div className="image-modal-card" onClick={(event) => event.stopPropagation()}>
             <div className="image-modal-header">
               <div>
-                <strong>{previewItem.styleNo || previewItem.spu || '商品图片'}</strong>
+                <strong>{previewItem.styleNo || previewItem.spu || t.productImage}</strong>
                 <span>{previewItem.spu || '-'} / {previewItem.skcId || '-'}</span>
               </div>
-              <button type="button" className="image-modal-close" onClick={closeImagePreview} aria-label="关闭预览">×</button>
+              <button type="button" className="image-modal-close" onClick={closeImagePreview} aria-label={t.closePreview}>×</button>
             </div>
             <div className="image-modal-body">
-              <img src={previewItem.imageLink} alt={previewItem.styleNo || previewItem.spu || '商品图片'} />
+              <img src={previewItem.imageLink} alt={previewItem.styleNo || previewItem.spu || t.productImage} />
             </div>
             <div className="image-modal-footer">
-              <a href={previewItem.imageLink} target="_blank" rel="noreferrer">打开原图</a>
+              <a href={previewItem.imageLink} target="_blank" rel="noreferrer">{t.openOriginal}</a>
             </div>
           </div>
         </div>
