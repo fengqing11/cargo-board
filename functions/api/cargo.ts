@@ -16,6 +16,38 @@ type PagesFunctionContext = {
   request: Request
 }
 
+type AirScriptBody = {
+  Context?: {
+    argv?: Record<string, unknown>
+  }
+}
+
+function firstQueryValue(url: URL, keys: string[]) {
+  return keys
+    .map((key) => url.searchParams.get(key)?.trim())
+    .find((value): value is string => Boolean(value))
+}
+
+function mergeStoreNameIntoBody(rawBody: string, storeName: string) {
+  if (!storeName) return rawBody || '{}'
+
+  try {
+    const body = (rawBody ? JSON.parse(rawBody) : {}) as AirScriptBody
+    return JSON.stringify({
+      ...body,
+      Context: {
+        ...body.Context,
+        argv: {
+          ...body.Context?.argv,
+          store_name: storeName,
+        },
+      },
+    })
+  } catch {
+    return rawBody || '{}'
+  }
+}
+
 function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -67,7 +99,9 @@ export async function onRequestPost({ request }: PagesFunctionContext) {
 
   try {
     const body = await request.text()
-    const cacheKey = body || '{}'
+    const url = new URL(request.url)
+    const storeName = firstQueryValue(url, ['store_name', 'storeName', 'store', 'shop_name', 'shop']) || ''
+    const cacheKey = mergeStoreNameIntoBody(body, storeName)
     const now = Date.now()
     const cached = responseCache.get(cacheKey)
 

@@ -47,6 +47,32 @@ function readRequestBody(req) {
   })
 }
 
+function firstQueryValue(url, keys) {
+  return keys
+    .map((key) => url.searchParams.get(key)?.trim())
+    .find(Boolean)
+}
+
+function mergeStoreNameIntoBody(rawBody, storeName) {
+  if (!storeName) return rawBody || '{}'
+
+  try {
+    const body = rawBody ? JSON.parse(rawBody) : {}
+    return JSON.stringify({
+      ...body,
+      Context: {
+        ...body.Context,
+        argv: {
+          ...body.Context?.argv,
+          store_name: storeName,
+        },
+      },
+    })
+  } catch {
+    return rawBody || '{}'
+  }
+}
+
 function proxyCargo(body) {
   return new Promise((resolve, reject) => {
     const parsed = new URL(KDOCS_API)
@@ -85,9 +111,11 @@ function proxyCargo(body) {
   })
 }
 
-async function handleCargo(req, res) {
+async function handleCargo(req, res, requestUrl) {
   try {
-    const body = await readRequestBody(req)
+    const rawBody = await readRequestBody(req)
+    const storeName = firstQueryValue(requestUrl, ['store_name', 'storeName', 'store', 'shop_name', 'shop']) || ''
+    const body = mergeStoreNameIntoBody(rawBody, storeName)
     const now = Date.now()
     const cached = responseCache.get(body)
 
@@ -165,7 +193,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`)
 
   if (url.pathname === '/api/cargo') {
-    await handleCargo(req, res)
+    await handleCargo(req, res, url)
     return
   }
 

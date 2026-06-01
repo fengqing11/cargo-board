@@ -444,7 +444,7 @@ function App() {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch('/api/cargo', {
+      const response = await fetch(`/api/cargo?store_name=${encodeURIComponent(storeName)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ Context: { argv: { store_name: storeName } } }),
