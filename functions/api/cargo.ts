@@ -102,10 +102,11 @@ export async function onRequestPost({ request }: PagesFunctionContext) {
     const url = new URL(request.url)
     const storeName = firstQueryValue(url, ['store_name', 'storeName', 'store', 'shop_name', 'shop']) || ''
     const cacheKey = mergeStoreNameIntoBody(body, storeName)
+    const forceRefresh = url.searchParams.has('refresh') || url.searchParams.get('cache') === 'reload'
     const now = Date.now()
     const cached = responseCache.get(cacheKey)
 
-    if (cached && cached.expiresAt > now) {
+    if (!forceRefresh && cached && cached.expiresAt > now) {
       return cachedResponse(cached)
     }
 

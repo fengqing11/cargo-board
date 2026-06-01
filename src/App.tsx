@@ -440,11 +440,14 @@ function App() {
   const t = TEXT[language]
   const displayName = getStoreDisplayName(storeName)
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (forceRefresh = false) => {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch(`/api/cargo?store_name=${encodeURIComponent(storeName)}`, {
+      const params = new URLSearchParams({ store_name: storeName })
+      if (forceRefresh) params.set('refresh', String(Date.now()))
+
+      const response = await fetch(`/api/cargo?${params.toString()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ Context: { argv: { store_name: storeName } } }),
@@ -675,7 +678,7 @@ function App() {
           <p className="sub-title">{t.subtitle}</p>
         </div>
         <div className="actions">
-          <button type="button" onClick={loadData} disabled={loading}>{loading ? t.refreshing : t.refresh}</button>
+          <button type="button" onClick={() => loadData(true)} disabled={loading}>{loading ? t.refreshing : t.refresh}</button>
           <button type="button" className="secondary" onClick={() => exportCsv(sortedItems, language, displayName)} disabled={!sortedItems.length} title={t.exportTitle}>{t.exportCurrent}</button>
         </div>
       </header>

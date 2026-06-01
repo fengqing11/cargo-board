@@ -116,10 +116,11 @@ async function handleCargo(req, res, requestUrl) {
     const rawBody = await readRequestBody(req)
     const storeName = firstQueryValue(requestUrl, ['store_name', 'storeName', 'store', 'shop_name', 'shop']) || ''
     const body = mergeStoreNameIntoBody(rawBody, storeName)
+    const forceRefresh = requestUrl.searchParams.has('refresh') || requestUrl.searchParams.get('cache') === 'reload'
     const now = Date.now()
     const cached = responseCache.get(body)
 
-    if (cached && cached.expiresAt > now) {
+    if (!forceRefresh && cached && cached.expiresAt > now) {
       res.writeHead(cached.statusCode, {
         'Content-Type': cached.contentType,
         'Cache-Control': 'public, max-age=60, s-maxage=60',
