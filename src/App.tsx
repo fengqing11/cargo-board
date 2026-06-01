@@ -36,8 +36,22 @@ type SortKey = 'sales30' | 'sales7' | 'daysOnline'
 type SortDirection = 'asc' | 'desc'
 type Language = 'zh' | 'en'
 
-const STORE_NAME = 'TTS-烛照'
-const DISPLAY_NAME = 'TTS-Chic NVF'
+const DEFAULT_STORE_NAME = 'TTS-烛照'
+const DEFAULT_DISPLAY_NAME = 'TTS-Chic NVF'
+const STORE_QUERY_KEYS = ['store_name', 'storeName', 'store', 'shop_name', 'shop']
+
+function readStoreNameFromUrl() {
+  const params = new URLSearchParams(window.location.search)
+  const storeName = STORE_QUERY_KEYS
+    .map((key) => params.get(key)?.trim())
+    .find((value): value is string => Boolean(value))
+
+  return storeName || DEFAULT_STORE_NAME
+}
+
+function getStoreDisplayName(storeName: string) {
+  return storeName === DEFAULT_STORE_NAME ? DEFAULT_DISPLAY_NAME : storeName
+}
 const MARKET_KEYS = [
   'PID-US（美国）',
   'PID-GB（英国）',
@@ -235,7 +249,7 @@ function tagDescription(label: string, language: Language) {
   return TAG_DESCRIPTIONS[label]?.[language] || TAG_DESCRIPTIONS[label]?.zh || ''
 }
 
-function buildPitchText(item: CargoItem, language: Language) {
+function buildPitchText(item: CargoItem, language: Language, displayName: string) {
   const t = TEXT[language]
   const activePids = MARKET_KEYS
     .map((key) => ({ market: MARKET_LABELS[language][key], pid: item.pids[key] }))
@@ -243,7 +257,7 @@ function buildPitchText(item: CargoItem, language: Language) {
     .map(({ market, pid }) => `${market}: ${pid}`)
 
   return [
-    `【${DISPLAY_NAME} ${t.pitchTitle}】`,
+    `【${displayName} ${t.pitchTitle}】`,
     `SPU: ${item.spu || '-'}`,
     `SKC: ${item.skcId || '-'}`,
     `${t.styleNo}: ${item.styleNo || '-'}`,
@@ -258,7 +272,7 @@ function buildPitchText(item: CargoItem, language: Language) {
   ].filter(Boolean).join('\n')
 }
 
-function exportCsv(items: CargoItem[], language: Language) {
+function exportCsv(items: CargoItem[], language: Language, displayName: string) {
   const t = TEXT[language]
   const headers = [t.store, t.imageLink, 'SPU', 'SKC ID', t.styleNo, t.color, t.category, t.pickTags, t.operator, t.daysOnline, t.sales7, t.sales30, ...MARKET_KEYS.map((key) => MARKET_LABELS[language][key])]
   const rows = items.map((item) => [
@@ -283,7 +297,7 @@ function exportCsv(items: CargoItem[], language: Language) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${DISPLAY_NAME}-${t.fileSuffix}.csv`
+  a.download = `${displayName}-${t.fileSuffix}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -421,8 +435,10 @@ function App() {
   const [previewItem, setPreviewItem] = useState<CargoItem | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [language, setLanguage] = useState<Language>(readSavedLanguage)
+  const [storeName, setStoreName] = useState(readStoreNameFromUrl)
   const [isPending, startTransition] = useTransition()
   const t = TEXT[language]
+  const displayName = getStoreDisplayName(storeName)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -431,7 +447,7 @@ function App() {
       const response = await fetch('/api/cargo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Context: { argv: { store_name: STORE_NAME } } }),
+        body: JSON.stringify({ Context: { argv: { store_name: storeName } } }),
       })
       if (!response.ok) throw new Error(`${t.requestFailed}${response.status}`)
       const payload = await response.json()
@@ -449,13 +465,19 @@ function App() {
     } finally {
       setLoading(false)
     }
-  }, [language, t.loadFailed, t.requestFailed])
+  }, [language, storeName, t.loadFailed, t.requestFailed])
 
   useEffect(() => {
     queueMicrotask(() => {
       void loadData()
     })
   }, [loadData])
+
+  useEffect(() => {
+    const handleUrlChange = () => setStoreName(readStoreNameFromUrl())
+    window.addEventListener('popstate', handleUrlChange)
+    return () => window.removeEventListener('popstate', handleUrlChange)
+  }, [])
 
   useEffect(() => {
     window.localStorage.setItem(BASKET_STORAGE_KEY, JSON.stringify(Array.from(selectedIds)))
@@ -560,23 +582,23 @@ function App() {
     if (!selectedItems.length) return
 
     try {
-      await navigator.clipboard.writeText(selectedItems.map((item) => buildPitchText(item, language)).join('\n\n---\n\n'))
+      await navigator.clipboard.writeText(selectedItems.map((item) => buildPitchText(item, language, displayName)).join('\n\n---\n\n'))
       setCopiedPid('selected:pitch')
       window.setTimeout(() => setCopiedPid((current) => (current === 'selected:pitch' ? '' : current)), 1200)
     } catch {
       setError(t.clipboardError)
     }
-  }, [language, selectedItems, t.clipboardError])
+  }, [displayName, language, selectedItems, t.clipboardError])
 
   const handleCopyPitch = useCallback(async (item: CargoItem) => {
     try {
-      await navigator.clipboard.writeText(buildPitchText(item, language))
+      await navigator.clipboard.writeText(buildPitchText(item, language, displayName))
       setCopiedPid(`pitch:${item.id}`)
       window.setTimeout(() => setCopiedPid((current) => (current === `pitch:${item.id}` ? '' : current)), 1200)
     } catch {
       setError(t.clipboardError)
     }
-  }, [language, t.clipboardError])
+  }, [displayName, language, t.clipboardError])
 
   const handleCopyPid = useCallback(async (pid: string) => {
     if (!pid || pid === '-') return
@@ -646,12 +668,12 @@ function App() {
               <span className={language === 'en' ? 'active' : ''}>EN</span>
             </button>
           </div>
-          <h1>{DISPLAY_NAME} {t.title}</h1>
+          <h1>{displayName} {t.title}</h1>
           <p className="sub-title">{t.subtitle}</p>
         </div>
         <div className="actions">
           <button type="button" onClick={loadData} disabled={loading}>{loading ? t.refreshing : t.refresh}</button>
-          <button type="button" className="secondary" onClick={() => exportCsv(sortedItems, language)} disabled={!sortedItems.length} title={t.exportTitle}>{t.exportCurrent}</button>
+          <button type="button" className="secondary" onClick={() => exportCsv(sortedItems, language, displayName)} disabled={!sortedItems.length} title={t.exportTitle}>{t.exportCurrent}</button>
         </div>
       </header>
 
@@ -716,7 +738,7 @@ function App() {
           >
             {showSelectedOnly ? t.viewAll : t.selectedOnly}
           </button>
-          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems, language)}>{t.exportSelected}</button>
+          <button type="button" className="secondary" disabled={!selectedItems.length} onClick={() => exportCsv(selectedItems, language, displayName)}>{t.exportSelected}</button>
           <button type="button" disabled={!selectedItems.length} onClick={handleCopySelectedPitch}>{copiedPid === 'selected:pitch' ? t.copied : t.copySelected}</button>
           <button
             type="button"
